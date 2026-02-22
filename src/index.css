@@ -1,1 +1,9 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Castoro&display=swap');
+
+@font-face {
+    font-family: 'CirrusCumulus';
+    src: url('./assets/fonts/CirrusCumulus.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}

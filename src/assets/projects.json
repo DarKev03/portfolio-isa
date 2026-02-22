@@ -1,0 +1,56 @@
+[
+    {
+        "id": 1,
+        "title": "Lazos",
+        "description": "Un sitio web moderno construido con React, Vite y Tailwind CSS para mostrar mis proyectos y habilidades.",
+        "tags": [
+            "Fotografía",
+            "Editorial"
+        ],
+        "image": "https://picsum.photos/seed/portfolio/600/400",
+        "year": 2024
+    },
+    {
+        "id": 2,
+        "title": "Malmö",
+        "description": "Una plataforma de comercio electrónico con carrito de compras, pasarela de pago y panel de administración.",
+        "tags": [
+            "Identidad"
+        ],
+        "image": "https://picsum.photos/seed/ecommerce/600/400",
+        "year": 2023
+    },
+    {
+        "id": 3,
+        "title": "Por si a caso",
+        "description": "Visualización de datos complejos en tiempo real utilizando gráficos interactivos y filtros dinámicos.",
+        "tags": [
+            "Editorial",
+            "Experimental"
+        ],
+        "image": "https://picsum.photos/seed/dashboard/600/400",
+        "year": 2024
+    },
+    {
+        "id": 4,
+        "title": "Coia",
+        "description": "Descripción del proyecto Coia.",
+        "tags": [
+            "Identidad",
+            "UIUX"
+        ],
+        "image": "https://picsum.photos/seed/coia/600/400",
+        "year": 2024
+    },
+    {
+        "id": 5,
+        "title": "Señaletica aereopuerto",
+        "description": "Sistema de señalización y orientación para terminales aéreas.",
+        "tags": [
+            "Identidad",
+            "Editorial"
+        ],
+        "image": "https://picsum.photos/seed/airport/600/400",
+        "year": 2023
+    }
+]
