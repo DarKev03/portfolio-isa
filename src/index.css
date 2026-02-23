@@ -1,9 +1,18 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Castoro&display=swap');
+@import "tailwindcss";
 
 @font-face {
     font-family: 'CirrusCumulus';
     src: url('./assets/fonts/CirrusCumulus.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
+}
+
+@utility no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }

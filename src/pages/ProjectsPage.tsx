@@ -3,12 +3,13 @@ import projectsData from "../assets/projects.json";
 import { Project } from "../types/Project";
 import { useState } from "react";
 import NavBar from "../components/NavBar";
-import gif from "../assets/videos/200.gif";
+import { Link } from "react-router-dom";
+import gif from "../assets/videos/video_projects.mp4";
 
 let hasHoveredInSession = false;
 
 const ProjectsPage = () => {
-    const projectList: Project[] = projectsData;
+    const projectList: Project[] = projectsData as Project[];
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
     const [hoveredProjectId, setHoveredProjectId] = useState<number | null>(null);
@@ -34,9 +35,10 @@ const ProjectsPage = () => {
 
             <div className="mt-auto flex flex-col items-start gap-2 pb-11" style={{ ...castoroFamily, color: 'rgba(76, 76, 76, 0.3)' }}>
                 {projectList.map((project, index) => (
-                    <div
+                    <Link
                         key={project.id}
-                        className="relative flex flex-row items-center gap-20 pl-11 hover:text-gray-600 cursor-pointer transition-colors duration-500 ease-in-out"
+                        to={`/projects/${project.id}`}
+                        className="relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hover:text-gray-600 cursor-pointer transition-colors duration-500 ease-in-out w-full"
                         onMouseEnter={() => handleMouseEnter(project.id)}
                         onMouseLeave={() => setHoveredProjectId(null)}
                     >
@@ -59,22 +61,19 @@ const ProjectsPage = () => {
                             <span>)</span>
                         </div>
                         <span className="text-base font-normal pl-8 mt-auto">{project.year}</span>
-                        {!alreadyHovered && (
-                            <div className="absolute left-200 bottom-0 w-100 h-80 pointer-events-none">
-                                <img src={gif} alt={project.title} className="w-full h-full object-cover" />
+                        {!alreadyHovered && project.id === 1 && (
+                            <div className="absolute left-200 bottom-0 w-90 lg:left-250 aspect-square pointer-events-none">
+                                <video src={gif} autoPlay loop muted className="w-full h-full object-cover"></video>
                             </div>
                         )}
                         {hoveredProjectId === project.id && (
-                            <div className="absolute left-200 bottom-0 w-100 h-80 pointer-events-none">
+                            <div className="absolute left-200 bottom-0 w-90 aspect-square lg:left-250 pointer-events-none">
                                 <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
                             </div>
                         )}
-                        {hoveredProjectId === project.id ? (
-                            <span className="rounded-full bg-gray-600 px-1 py-1 mt-auto ml-175"></span>
-                        ) : (
-                            <span className="rounded-full bg-gray-300 px-1 py-1 mt-auto ml-175"></span>
-                        )}
-                    </div>
+                        <span className={`rounded-full px-1 py-1 mt-auto ml-auto transition-colors duration-500 ${hoveredProjectId === project.id ? "bg-gray-600" : "bg-gray-300"
+                            }`}></span>
+                    </Link>
                 ))}
             </div>
         </div>
