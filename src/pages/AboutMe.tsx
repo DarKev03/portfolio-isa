@@ -41,8 +41,14 @@ const AboutMe = () => {
         return () => ctx.revert();
     }, []);
 
+    useEffect(() => {
+        const root = document.documentElement;
+        root.classList.add('no-scrollbar');
+        return () => root.classList.remove('no-scrollbar');
+    }, []);
+
     return (
-        <div className="h-[150vh] bg-[#fffefd]">
+        <div className="h-[150vh] bg-[#fffefd] no-scrollbar">
 
             <div
                 ref={sectionRef}

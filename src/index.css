@@ -8,13 +8,13 @@
     font-style: normal;
 }
 
-@utility no-scrollbar {
+.no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
 
-    &::-webkit-scrollbar {
-        display: none;
-    }
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
 }
 
 .infinite-canvas-root,
