@@ -14,6 +14,8 @@ const AboutMe = () => {
     const titleContentRef = useRef<HTMLDivElement>(null);
     const parentesisRef = useRef<HTMLDivElement>(null);
     const bioRef = useRef<HTMLDivElement>(null);
+    const expeRef = useRef<HTMLDivElement>(null);
+    const footerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -68,6 +70,41 @@ const AboutMe = () => {
                         bioRef.current!.getBoundingClientRect();
 
                     return titleRect.bottom - bioRect.top;
+                },
+
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: 'top top',
+                    end: '+=300',
+                    scrub: true,
+                    invalidateOnRefresh: true,
+                },
+            })
+            gsap.to(footerRef.current, {
+                opacity: 1,
+
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: 'top top',
+                    end: '+=300',
+                    scrub: true,
+                    invalidateOnRefresh: true,
+                },
+            })
+            gsap.to(expeRef.current, {
+                opacity: 1,
+
+                y: () => {
+                    const bioRect =
+                        bioRef.current!.getBoundingClientRect();
+
+                    const expeRect =
+                        expeRef.current!.getBoundingClientRect();
+
+                    const titleRect =
+                        titleContentRef.current!.getBoundingClientRect();
+
+                    return ((titleRect.bottom - bioRect.top) + (bioRect.bottom - expeRect.top));
                 },
 
                 scrollTrigger: {
@@ -149,7 +186,7 @@ const AboutMe = () => {
 
                 </div>
 
-                <div className="absolute bottom-0 left-0 z-50 w-140 p-8 flex flex-col gap-7" style={{ fontFamily: 'Castoro, sans-serif' }}>
+                <div ref={expeRef} className="absolute bottom-0 left-0 z-50 w-140 p-8 flex flex-col gap-7 opacity-0" style={{ fontFamily: 'Castoro, sans-serif' }}>
                     <div>
                         <h1 className="text-lg font-normal leading-tight">Grado en Diseño Gráfico / <br></br>
                             <span className="italic">Escola Superior de Disseny de Valéncia</span> </h1>
@@ -167,8 +204,23 @@ const AboutMe = () => {
                     </div>
 
                     <div>
-
+                        <p className="text-lg font-normal leading-tight cursor-pointer italic text-[#4c4c4c9e]">
+                            (download CV)
+                        </p>
                     </div>
+                </div>
+
+                <div ref={footerRef} className="absolute bottom-0 left-0 z-50 w-140 p-8 flex flex-row gap-8 text-md italic leading-tight align-baseline text-[#4C4C4C] opacity-0" style={{ fontFamily: 'Castoro, sans-serif' }}>
+                    <p>
+                        LinkedIn <br></br>
+                        Instagram <br></br>
+                        (i.fuabel.minguez@gmail.es)
+                    </p>
+                    <p className="not-italic">
+                        <br></br>
+                        <br></br>
+                        by Isabel Faubel ©2026
+                    </p>
                 </div>
 
             </div>
