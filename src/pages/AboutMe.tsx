@@ -9,6 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 const AboutMe = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const imgRef = useRef<HTMLImageElement>(null);
+    const img2Ref = useRef<HTMLImageElement>(null);
     const navBarRef = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLDivElement>(null);
     const titleContentRef = useRef<HTMLDivElement>(null);
@@ -21,6 +22,23 @@ const AboutMe = () => {
         const ctx = gsap.context(() => {
             gsap.to(imgRef.current, {
                 y: 200,
+                opacity: 0,
+                rotation: 0,
+
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: 'top top',
+                    end: '+=300',
+                    scrub: true,
+                },
+            })
+            gsap.from(img2Ref.current, {
+                y: () => {
+                    const imgRect =
+                        imgRef.current!.getBoundingClientRect();
+
+                    return -1 * imgRect.top;
+                },
                 opacity: 0,
                 rotation: 0,
 
@@ -165,6 +183,14 @@ const AboutMe = () => {
                         />
                     </div>
 
+                </div>
+
+                <div className="pr-16 absolute bottom-0 right-0 z-50 pb-8">
+                    <img
+                        ref={img2Ref}
+                        src="/svgviewer-output-scroll.svg"
+                        alt=""
+                    />
                 </div>
 
 
