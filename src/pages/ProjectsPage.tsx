@@ -1,7 +1,7 @@
 import Title from "../components/Title";
 import projectsData from "../assets/projects.json";
 import { Project } from "../types/Project";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import NavBar from "../components/NavBar";
 import { Link } from "react-router-dom";
 import gif from "../assets/videos/video_projects.mp4";
@@ -9,6 +9,8 @@ import gif from "../assets/videos/video_projects.mp4";
 let hasHoveredInSession = false;
 
 const ProjectsPage = () => {
+    const backgroundRef = useRef<HTMLDivElement>(null);
+
     const projectList: Project[] = projectsData as Project[];
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
@@ -21,10 +23,10 @@ const ProjectsPage = () => {
             setAlreadyHovered(true);
             hasHoveredInSession = true;
         }
-    };
+    };    
 
     return (
-        <div className="bg-[rgba(255,254,253,1)] min-h-screen flex flex-col">
+        <div ref={backgroundRef} className="bg-[rgba(255,254,253,1)] min-h-screen flex flex-col">
             <div className="flex items-start pt-9 pl-11">
                 <Title />
             </div>
@@ -33,17 +35,17 @@ const ProjectsPage = () => {
                 <NavBar />
             </div>
 
-            <div className="mt-auto flex flex-col items-start gap-2 pb-11" style={{ ...castoroFamily, color: 'rgba(76, 76, 76, 0.3)' }}>
+            <div className="mt-auto flex flex-col items-start gap-8 pb-11" style={{ ...castoroFamily, color: 'rgba(76, 76, 76, 0.3)' }}>
                 {projectList.map((project, index) => (
                     <Link
                         key={project.id}
                         to={`/projects/${project.id}`}
-                        className="relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hover:text-gray-600 cursor-pointer transition-colors duration-500 ease-in-out w-full"
+                        className="group relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hover:text-gray-600 cursor-pointer transition-colors duration-500 ease-in-out w-full"
                         onMouseEnter={() => handleMouseEnter(project.id)}
                         onMouseLeave={() => setHoveredProjectId(null)}
                     >
                         <div className="flex flex-col items-start w-64 m-0 mt-auto">
-                            <h3 className="text-2xl font-normal m-0 leading-none">{project.title}</h3>
+                            <h3 className="text-2xl font-normal m-0 leading-none transition-all duration-400 group-hover:-skew-x-10">{project.title}</h3>
                             <div className="flex flex-wrap m-0 leading-none -mt-0.5">
                                 {project.tags.map((tag, tagIndex) => (
                                     <div key={tag} className="flex items-center leading-none">
@@ -67,12 +69,10 @@ const ProjectsPage = () => {
                             </div>
                         )}
                         {hoveredProjectId === project.id && (
-                            <div className="absolute left-200 bottom-0 w-90 aspect-square lg:left-250 pointer-events-none">
+                            <div className="absolute right-0 bottom-0 pr-14 w-[40vw] aspect-video pointer-events-none">
                                 <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
                             </div>
-                        )}
-                        <span className={`rounded-full px-1 py-1 mt-auto ml-auto transition-colors duration-500 ${hoveredProjectId === project.id ? "bg-gray-600" : "bg-gray-300"
-                            }`}></span>
+                        )}                        
                     </Link>
                 ))}
             </div>
