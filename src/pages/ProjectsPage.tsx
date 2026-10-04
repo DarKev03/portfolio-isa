@@ -52,7 +52,7 @@ const ProjectsPage = () => {
             </div>
 
 <div
-                className="mt-auto flex flex-col items-start gap-2 pb-11"
+                className="mt-auto flex flex-col items-start gap-8 pb-11"
                 style={{
                     ...castoroFamily,
                     color: "rgba(76, 76, 76, 0.3)"
@@ -61,14 +61,13 @@ const ProjectsPage = () => {
                 {projectList.map((project, index) => (
                     <div
                         key={project.id}
-className="relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hover:text-gray-600 cursor-pointer transition-colors duration-500 ease-in-out w-full"
+                        className="group relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hover:text-gray-600 cursor-pointer transition-colors duration-500 ease-in-out w-full"
                         onClick={() => setSelectedProject(project)}
                         onMouseEnter={() => handleMouseEnter(project.id)}
                         onMouseLeave={() => setHoveredProjectId(null)}
                     >
-
                         <div className="flex flex-col items-start w-64 m-0 mt-auto">
-<h3 className="text-2xl font-normal m-0 leading-none">
+                            <h3 className="text-2xl font-normal m-0 leading-none transition-all duration-400 group-hover:-skew-x-10">
                                 {project.title}
                             </h3>
                             <div className="flex flex-wrap m-0 leading-none -mt-0.5">
@@ -114,7 +113,7 @@ className="relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hove
                         )}
 
                         {hoveredProjectId === project.id && (
-                            <div className="absolute left-200 bottom-0 w-90 aspect-square lg:left-250 pointer-events-none">
+                            <div className="absolute right-0 bottom-0 pr-14 w-[40vw] aspect-video pointer-events-none">
                                 <img
                                     src={project.image}
                                     alt={project.title}
@@ -122,6 +121,17 @@ className="relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hove
                                 />
                             </div>
                         )}
+
+                        <span
+                            className={`
+                                rounded-full px-1 py-1 mt-auto ml-auto
+                                transition-colors duration-500
+                                ${hoveredProjectId === project.id
+                                    ? "bg-gray-600"
+                                    : "bg-gray-300"
+                                }
+                            `}
+                        />
                     </div>
                 ))}
             </div>
