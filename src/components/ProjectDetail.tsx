@@ -108,7 +108,7 @@ const ProjectDetail = ({ project, onClose }: ProjectDetailProps) => {
             onClick={(e) => e.stopPropagation()}
         >
             <div className="flex-none flex items-start pt-9 pl-11 pr-11 h-24 z-10">
-                <div className="ml-auto flex flex-row gap-5 text-base font-normal italic text-gray-400">
+                <div className="ml-auto flex flex-row gap-5 text-base font-normal italic text-[rgba(65, 65, 65, 1)]">
                     <button
                         onClick={onClose}
                         className="hover:text-black transition-colors pr-35"
@@ -138,17 +138,21 @@ const ProjectDetail = ({ project, onClose }: ProjectDetailProps) => {
 
             {/* Contenido */}
             <div
-                className="flex-1 overflow-hidden p-8"
+                className="flex-1 overflow-hidden p-8 pr-0"
                 ref={emblaRef}
             >
                 <div className="flex h-full">
+
+                    <div className="flex-none w-[60vw]" />
+
                     {project.content?.map((block, index) =>
                         renderBlock(
                             block,
                             index,
                             project.content?.length || 0
                         )
-                    )}
+                    )}                    
+
                 </div>
             </div>
         </div>

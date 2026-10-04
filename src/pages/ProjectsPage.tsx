@@ -122,23 +122,12 @@ className="relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hove
                                     className="w-full h-full object-cover"
                                 />
                             </div>
-                        )}
-
-                        <span
-                            className={`
-                                rounded-full px-1 py-1 mt-auto ml-auto
-                                transition-colors duration-500
-                                ${hoveredProjectId === project.id
-                                    ? "bg-gray-600"
-                                    : "bg-gray-300"
-                                }
-                            `}
-                        />
+                        )}                        
                     </div>
                 ))}
             </div>
-
-            {selectedProject && (
+            
+            {selectedProject && (                
                 <ProjectModal
                     project={selectedProject}
                     onClose={() => setSelectedProject(null)}

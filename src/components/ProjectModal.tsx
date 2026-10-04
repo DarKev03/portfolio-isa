@@ -12,12 +12,7 @@ const ProjectModal = ({
 }: ProjectModalProps) => {
     return (
         <div
-            className="
-                fixed inset-0
-                z-50
-                bg-transparent
-                flex items-center justify-center
-            "
+className="fixed inset-0 z-50 w-screen h-screen"
             onClick={onClose}
         >
             <div
