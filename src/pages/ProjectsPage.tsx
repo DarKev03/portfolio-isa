@@ -114,7 +114,6 @@ className="relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hove
                         )}
 
                         {hoveredProjectId === project.id && (
-{hoveredProjectId === project.id && (
                             <div className="absolute left-200 bottom-0 w-90 aspect-square lg:left-250 pointer-events-none">
                                 <img
                                     src={project.image}
@@ -122,7 +121,7 @@ className="relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hove
                                     className="w-full h-full object-cover"
                                 />
                             </div>
-                        )}                        
+                        )}
                     </div>
                 ))}
             </div>
