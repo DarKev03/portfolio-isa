@@ -5,9 +5,11 @@ import { ContentBlock } from "../types/ContentBlock";
 interface ProjectDetailProps {
     project: Project;
     onClose: () => void;
+    onPrevious: () => void;
+    onNext: () => void;
 }
 
-const ProjectDetail = ({ project, onClose }: ProjectDetailProps) => {
+const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailProps) => {
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
     const [emblaRef] = useEmblaCarousel({
@@ -105,31 +107,33 @@ const ProjectDetail = ({ project, onClose }: ProjectDetailProps) => {
     return (
         <div
             className="relative bg-transparent w-full h-full flex flex-col overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            onClick={onClose}
         >
             <div className="flex-none flex items-start pt-9 pl-11 pr-11 h-24 z-10">
                 <div className="ml-auto flex flex-row gap-5 text-base font-normal italic text-[rgba(65, 65, 65, 1)]">
                     <button
                         onClick={onClose}
-                        className="hover:text-black transition-colors pr-35"
+                        className="hover:text-black transition-colors pr-35 cursor-pointer"
                     >
                         ( proyectos )
                     </button>
 
                     <button
-                        onClick={() => {
-                            // atrás
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onPrevious();
                         }}
-                        className="hover:text-black transition-colors"
+                        className="hover:text-black transition-colors cursor-pointer"
                     >
                         ( atras )
                     </button>
 
                     <button
-                        onClick={() => {
-                            // siguiente
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onNext();
                         }}
-                        className="hover:text-black transition-colors"
+                        className="hover:text-black transition-colors cursor-pointer"
                     >
                         ( siguiente )
                     </button>
@@ -143,7 +147,7 @@ const ProjectDetail = ({ project, onClose }: ProjectDetailProps) => {
             >
                 <div className="flex h-full">
 
-                    <div className="flex-none w-[60vw]" />
+                    <div className="flex-none w-[50vw]" />
 
                     {project.content?.map((block, index) =>
                         renderBlock(
@@ -151,7 +155,7 @@ const ProjectDetail = ({ project, onClose }: ProjectDetailProps) => {
                             index,
                             project.content?.length || 0
                         )
-                    )}                    
+                    )}
 
                 </div>
             </div>

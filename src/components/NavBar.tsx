@@ -5,7 +5,7 @@ const NavBar = () => {
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
     return (
-        <nav className="p-4 flex flex-col items-center justify-between">
+        <nav className="flex flex-col items-center w-max">
             <div className="pb-14" style={{ ...castoroFamily }}>
                 <LanguageSelector />
             </div>

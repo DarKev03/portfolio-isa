@@ -5,6 +5,7 @@ import { useRef, useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import gif from "../assets/videos/video_projects.mp4";
 import ProjectModal from "../components/ProjectModal";
+import ProjectPreview from "../components/ProjectPreview";
 import gsap from 'gsap';
 
 let hasHoveredInSession = false;
@@ -20,6 +21,8 @@ const ProjectsPage = () => {
 
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
+    const navBarRef = useRef<HTMLDivElement>(null);
+
     const handleMouseEnter = (projectId: number) => {
         setHoveredProjectId(projectId);
 
@@ -27,9 +30,37 @@ const ProjectsPage = () => {
             setAlreadyHovered(true);
             hasHoveredInSession = true;
         }
-    };    
+    };
 
-    const navBarRef = useRef<HTMLDivElement>(null);
+    function setPreviousProject() {
+        if (!selectedProject) return;
+
+        const currentIndex = projectList.findIndex(
+            project => project.id === selectedProject.id
+        );
+
+        const previousIndex =
+            currentIndex === 0
+                ? projectList.length - 1
+                : currentIndex - 1;
+
+        setSelectedProject(projectList[previousIndex]);
+    }
+
+    function setNextProject() {
+        if (!selectedProject) return;
+
+        const currentIndex = projectList.findIndex(
+            project => project.id === selectedProject.id
+        );
+
+        const nextIndex =
+            currentIndex === (projectList.length - 1)
+                ? 0
+                : currentIndex + 1
+
+        setSelectedProject(projectList[nextIndex]);
+    }
 
     useEffect(() => {
         if (selectedProject) {
@@ -38,30 +69,37 @@ const ProjectsPage = () => {
                 ease: "power2.inOut",
             });
         }
+        else {
+            gsap.to(navBarRef.current, {
+                opacity: 1,
+                ease: "power2.inOut",
+            });
+        }
     }, [selectedProject]);
+    
 
     return (
         <div ref={backgroundRef} className="bg-[rgba(255,254,253,1)] min-h-screen flex flex-col">
 
-            <div className="flex items-start pt-9 pl-11">
+            <div className="fixed top-0 left-0 z-50 pointer-events-none p-8">
                 <Title />
             </div>
 
-            <div ref={navBarRef} className="flex flex-col ml-auto pr-10">
+            <div ref={navBarRef} className="fixed top-0 right-0 z-50 pt-8 pr-10">
                 <NavBar />
             </div>
 
-<div
+            <div
                 className="mt-auto flex flex-col items-start gap-8 pb-11"
                 style={{
                     ...castoroFamily,
-                    color: "rgba(76, 76, 76, 0.3)"
+                    color: selectedProject ? "rgba(76, 76, 76, 0.3)" : "rgba(65, 65, 65, 1)"
                 }}
             >
                 {projectList.map((project, index) => (
                     <div
                         key={project.id}
-                        className="group relative flex flex-row items-center gap-20 lg:gap-40 pl-11 pr-11 hover:text-gray-600 cursor-pointer transition-colors duration-500 ease-in-out w-full"
+                        className="group relative flex flex-row items-center gap-25 pl-11 pr-11 hover:text-gray-600 cursor-pointer transition-colors duration-500 ease-in-out w-full"
                         onClick={() => setSelectedProject(project)}
                         onMouseEnter={() => handleMouseEnter(project.id)}
                         onMouseLeave={() => setHoveredProjectId(null)}
@@ -81,7 +119,7 @@ const ProjectsPage = () => {
                                         </span>
 
                                         {tagIndex < project.tags.length - 1 && (
-                                            <span className="mx-2 text-gray-400">
+                                            <span className="mx-2">
                                                 /
                                             </span>
                                         )}
@@ -96,7 +134,7 @@ const ProjectsPage = () => {
                             <span>)</span>
                         </div>
 
-                        <span className="text-base font-normal pl-8 mt-auto">
+                        <span className="text-base font-normal mt-auto">
                             {project.year}
                         </span>
 
@@ -113,33 +151,20 @@ const ProjectsPage = () => {
                         )}
 
                         {hoveredProjectId === project.id && (
-                            <div className="absolute right-0 bottom-0 pr-14 w-[40vw] aspect-video pointer-events-none">
-                                <img
-                                    src={project.image}
-                                    alt={project.title}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
+                            <ProjectPreview
+                                project={project}
+                            />
                         )}
-
-                        <span
-                            className={`
-                                rounded-full px-1 py-1 mt-auto ml-auto
-                                transition-colors duration-500
-                                ${hoveredProjectId === project.id
-                                    ? "bg-gray-600"
-                                    : "bg-gray-300"
-                                }
-                            `}
-                        />
                     </div>
                 ))}
             </div>
-            
-            {selectedProject && (                
+
+            {selectedProject && (
                 <ProjectModal
                     project={selectedProject}
                     onClose={() => setSelectedProject(null)}
+                    onPrevious={setPreviousProject}
+                    onNext={setNextProject}
                 />
             )}
 
