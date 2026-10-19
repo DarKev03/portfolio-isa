@@ -7,6 +7,7 @@ import gif from "../assets/videos/video_projects.mp4";
 import ProjectModal from "../components/ProjectModal";
 import ProjectPreview from "../components/ProjectPreview";
 import gsap from 'gsap';
+import { Link } from "react-router-dom";
 
 let hasHoveredInSession = false;
 
@@ -76,13 +77,15 @@ const ProjectsPage = () => {
             });
         }
     }, [selectedProject]);
-    
+
 
     return (
         <div ref={backgroundRef} className="bg-[rgba(255,254,253,1)] min-h-screen flex flex-col">
 
             <div className="fixed top-0 left-0 z-50 pointer-events-none p-8">
-                <Title />
+                <Link to={"/"} className="pointer-events-auto inline-block">
+                    <Title />
+                </Link>
             </div>
 
             <div ref={navBarRef} className="fixed top-0 right-0 z-50 pt-8 pr-10">

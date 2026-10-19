@@ -11,6 +11,7 @@
 - Build: `npx tsc -b`
 - `ProjectsPage.tsx` >= 0bfee7f: combinar modal (onClick) con el diseño remoto (gap-8, skew `group-hover`, imagen hover derecha 40vw). NO volver a quitar esas clases.
 - Cabecera unificada: Title y NavBar usan `fixed` con p-8 / top-0 right-0 pt-8 idéntico en AboutMe y ProjectsPage.
+- MainPage: `contactOpen` (useState) + useEffect con gsap → ContactModal pasa a opacity 1 al clicar "Contacto"; NavBar acepta `onContactClick` (Link con preventDefault).
 
 ## Estructura
 - React + react-router-dom

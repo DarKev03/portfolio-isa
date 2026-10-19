@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Title from '../components/Title';
 
 import NavBar from '../components/NavBar';
+import { Link } from 'react-router-dom';
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -34,7 +35,7 @@ const AboutMe = () => {
 
     useEffect(() => {
 
-        const ctx = gsap.context(() => {           
+        const ctx = gsap.context(() => {
             const navBar = navBarRef.current;
             const imageContainer = imageContainerRef.current;
 
@@ -42,7 +43,7 @@ const AboutMe = () => {
 
             const navRect = navBar.getBoundingClientRect();
             const imageRect = imageContainer.getBoundingClientRect();
-            
+
             const targetY = navRect.bottom - imageRect.top + 20;
 
             gsap.set(imageContainer, {
@@ -223,7 +224,7 @@ const AboutMe = () => {
 
     }, []);
 
-    
+
     useEffect(() => {
 
         const root = document.documentElement;
@@ -252,7 +253,9 @@ const AboutMe = () => {
                 >
 
                     <div ref={titleContentRef}>
-                        <Title />
+                        <Link to={"/"} className="pointer-events-auto inline-block">
+                            <Title />
+                        </Link>
                     </div>
 
                 </div>

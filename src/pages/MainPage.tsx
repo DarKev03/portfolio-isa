@@ -4,6 +4,7 @@ import gsap from "gsap";
 import InfiniteCanvas from "../components/InfiniteCanvas";
 import Title from "../components/Title";
 import NavBar from "../components/NavBar";
+import ContactModal from "../components/ContactModal";
 
 const MainPage = () => {
     const titleRef = useRef<HTMLDivElement>(null);
@@ -11,9 +12,10 @@ const MainPage = () => {
     const backgroundRef = useRef<HTMLDivElement>(null);
     const titleRef2 = useRef<HTMLDivElement>(null);
     const navBarRef = useRef<HTMLDivElement>(null);
-    
 
     const [secondTitleVisible, setSecondTitleVisible] = useState(false);
+    const [contactOpen, setContactOpen] = useState(false);
+    const contactRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const el = titleRef.current;
@@ -67,6 +69,57 @@ const MainPage = () => {
         }
     }, [secondTitleVisible]);
 
+    useEffect(() => {
+        const contactEl = contactRef.current;
+        const titleEl = titleRef2.current;
+
+        if (!contactEl || !titleEl) return;
+
+        const tl = gsap.timeline();
+
+        if (contactOpen) {
+            tl.to(
+                contactEl,
+                {
+                    opacity: 1,
+                    duration: 0.5,
+                    ease: "power2.out",
+                },
+                0
+            ).to(
+                titleEl,
+                {
+                    opacity: 0,
+                    duration: 0.5,
+                    ease: "power2.out",
+                },
+                0
+            );
+        } else {
+            tl.to(
+                contactEl,
+                {
+                    opacity: 0,
+                    duration: 0.5,
+                    ease: "power2.in",
+                },
+                0
+            ).to(
+                titleEl,
+                {
+                    opacity: 1,
+                    duration: 4,
+                    ease: "power2.out",
+                },
+                0
+            );
+        }
+
+        return () => {
+            tl.kill();
+        };
+    }, [contactOpen]);
+
     return (
         <div
             onPointerDown={() => setSecondTitleVisible(true)}
@@ -94,7 +147,11 @@ const MainPage = () => {
                 ref={navBarRef}
                 className="fixed top-0 right-0 z-50 p-8 opacity-0"
             >
-                <NavBar />
+                <NavBar onContactClick={() => setContactOpen(!contactOpen)} />
+            </div>
+
+            <div ref={contactRef} className="opacity-0">
+                <ContactModal onClose={() => setContactOpen(false)} />
             </div>
         </div>
 
