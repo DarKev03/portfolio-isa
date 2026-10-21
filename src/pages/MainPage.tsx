@@ -47,6 +47,7 @@ const MainPage = () => {
 
     useEffect(() => {
         const el2 = titleRef2.current;
+        console.log("secondTitleVisible", secondTitleVisible);
         const el = titleRef.current;
         const navBarEl = navBarRef.current;
 
@@ -95,7 +96,7 @@ const MainPage = () => {
                 },
                 0
             );
-        } else {
+        } else if (!contactOpen && secondTitleVisible) {
             tl.to(
                 contactEl,
                 {
