@@ -14,7 +14,8 @@ const ContactModal = ({ onClose }: ProjectModalProps) => {
             className="fixed inset-0 pointer-events-none w-screen h-screen bg-[linear-gradient(to_bottom,#FFFEFD_0%,#FFFEFD_33.333%,rgba(255,255,255,0)_100%)]"
         >
             <div
-                className="fixed left-0 flex flex-col z-50 pointer-events-none p-8 italic"
+                className="fixed left-0 flex flex-col z-50 pointer-events-none p-8 italic text-[#414141] font-normal text-lg"
+                style={{ fontFamily: "'Castoro', serif" }}
             >
                 <p>LinkedIn</p>
                 <p>Instagram</p>
