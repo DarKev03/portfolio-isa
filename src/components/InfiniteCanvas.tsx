@@ -21,7 +21,9 @@ const pickImage = (r: number, c: number) => {
 
 const InfiniteCanvas = () => {
   const viewRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number | null>(null);
+  const inertiaFrameRef = useRef<number | null>(null);
+  const wheelFrameRef = useRef<number | null>(null);
+  const wheelDeltaRef = useRef({ x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [viewW, setViewW] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
   const [viewH, setViewH] = useState(typeof window !== "undefined" ? window.innerHeight : 800);
@@ -29,10 +31,15 @@ const InfiniteCanvas = () => {
   useGesture(
     {
       onDrag: ({ delta: [dx, dy] }) => {
-        if (rafRef.current !== null) {
-          cancelAnimationFrame(rafRef.current);
-          rafRef.current = null;
+        if (inertiaFrameRef.current !== null) {
+          cancelAnimationFrame(inertiaFrameRef.current);
+          inertiaFrameRef.current = null;
         }
+        if (wheelFrameRef.current !== null) {
+          cancelAnimationFrame(wheelFrameRef.current);
+          wheelFrameRef.current = null;
+        }
+        wheelDeltaRef.current = { x: 0, y: 0 };
         setOffset((o) => ({ x: o.x + dx, y: o.y + dy }));
       },
       onDragEnd: ({ velocity: [vx, vy] }) => {
@@ -45,18 +52,41 @@ const InfiniteCanvas = () => {
           velX *= Math.pow(0.0008, dt);
           velY *= Math.pow(0.0008, dt);
           if (Math.abs(velX) < 0.3 && Math.abs(velY) < 0.3) {
-            rafRef.current = null;
+            inertiaFrameRef.current = null;
             return;
           }
           setOffset((o) => ({ x: o.x + velX * dt, y: o.y + velY * dt }));
-          rafRef.current = requestAnimationFrame(step);
+          inertiaFrameRef.current = requestAnimationFrame(step);
         };
-        rafRef.current = requestAnimationFrame(step);
+        inertiaFrameRef.current = requestAnimationFrame(step);
+      },
+      onWheel: ({ delta: [dx, dy] }) => {
+        if (inertiaFrameRef.current !== null) {
+          cancelAnimationFrame(inertiaFrameRef.current);
+          inertiaFrameRef.current = null;
+        }
+        wheelDeltaRef.current.x -= dx;
+        wheelDeltaRef.current.y -= dy;
+
+        if (wheelFrameRef.current !== null) return;
+
+        wheelFrameRef.current = requestAnimationFrame(() => {
+          const wheelDelta = wheelDeltaRef.current;
+
+          setOffset((o) => ({
+            x: o.x + wheelDelta.x,
+            y: o.y + wheelDelta.y,
+          }));
+          wheelDeltaRef.current = { x: 0, y: 0 };
+          wheelFrameRef.current = null;
+        });
       },
     },
     {
       target: viewRef,
       drag: { filterTaps: true },
+      wheel: { preventDefault: true },
+      eventOptions: { passive: false },
     },
   );
 
@@ -69,7 +99,16 @@ const InfiniteCanvas = () => {
       setViewH(r.height);
     });
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+
+      if (inertiaFrameRef.current !== null) {
+        cancelAnimationFrame(inertiaFrameRef.current);
+      }
+      if (wheelFrameRef.current !== null) {
+        cancelAnimationFrame(wheelFrameRef.current);
+      }
+    };
   }, []);
 
   const colStart = Math.floor(-offset.x / STEP_X) - MARGIN;
@@ -90,7 +129,15 @@ const InfiniteCanvas = () => {
       className="w-full h-full overflow-hidden touch-none select-none"
       style={{ background: "#F7F7F5", cursor: "default" }}
     >
-      <div style={{ position: "absolute", left: offset.x, top: offset.y }}>
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          transform: `translate3d(${offset.x}px, ${offset.y}px, 0)`,
+          willChange: "transform",
+        }}
+      >
         {cells.map(({ r, c }) => (
           <div
             key={`${r}-${c}`}
@@ -108,7 +155,8 @@ const InfiniteCanvas = () => {
             <img
               src={pickImage(r, c)}
               alt=""
-              loading="lazy"
+              loading="eager"
+              decoding="async"
               style={{
                 width: "100%",
                 height: "100%",

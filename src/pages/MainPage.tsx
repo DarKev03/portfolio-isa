@@ -124,6 +124,7 @@ const MainPage = () => {
     return (
         <div
             onPointerDown={() => setSecondTitleVisible(true)}
+            onWheel={() => setSecondTitleVisible(true)}
             ref={backgroundRef}
             className="relative h-screen w-screen overflow-hidden">
             <div

@@ -4,7 +4,7 @@ const LanguageSelector = () => {
     const [isSpanish, setIsSpanish] = useState(true);
 
     return (
-        <div className="flex flex-row gap-1">
+        <div className="flex flex-row gap-1 text-right text-md">
             <button className={`font-normal hover:underline cursor-pointer ${isSpanish ? '' : 'italic'}`} onClick={() => setIsSpanish(false)}>
                 EN
             </button>

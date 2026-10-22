@@ -88,7 +88,7 @@ const ProjectsPage = () => {
                 </Link>
             </div>
 
-            <div ref={navBarRef} className="fixed top-0 right-0 z-50 pt-8 pr-10">
+            <div ref={navBarRef} className="fixed top-0 right-0 z-50 p-8">
                 <NavBar />
             </div>
 
