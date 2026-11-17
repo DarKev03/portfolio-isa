@@ -62,16 +62,20 @@ const AboutMe = () => {
                 opacity: 1,
             });
 
+            const photoScrollDistance = 300;
+            const photoTimeline = gsap.timeline({
+                defaults: { ease: 'none' },
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: 'top top',
+                    end: `+=${photoScrollDistance}`,
+                    scrub: true,
+                },
+            });
+            photoTimeline.to(imageContainer, { y: targetY - photoScrollDistance }, 0);
+
             if (img2Ref.current) {
-                gsap.to(img2Ref.current, {
-                    opacity: 1,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: 'top top',
-                        end: '+=300',
-                        scrub: true,
-                    },
-                });
+                photoTimeline.to(img2Ref.current, { opacity: 1 }, 0);
             }
 
 
