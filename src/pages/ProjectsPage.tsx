@@ -2,14 +2,11 @@ import Title from "../components/Title";
 import { useProjects } from "../contentful/useProjects";
 import { useRef, useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
-import gif from "../assets/videos/video_projects.mp4";
 import ProjectModal from "../components/ProjectModal";
 import ProjectPreview from "../components/ProjectPreview";
 import gsap from 'gsap';
 import { Link } from "react-router-dom";
 import { useTranslation } from "../i18n/translations";
-
-let hasHoveredInSession = false;
 
 const ProjectsPage = () => {
     const text = useTranslation();
@@ -19,22 +16,12 @@ const ProjectsPage = () => {
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
     const [hoveredProjectId, setHoveredProjectId] = useState<string | number | null>(null);
-    const [alreadyHovered, setAlreadyHovered] = useState<boolean>(hasHoveredInSession);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
     const selectedProject = projectList.find(project => project.id === selectedProjectId);
     const isProjectOpen = Boolean(selectedProject);
 
     const navBarRef = useRef<HTMLDivElement>(null);
-
-    const handleMouseEnter = (projectId: string | number) => {
-        setHoveredProjectId(projectId);
-
-        if (!alreadyHovered) {
-            setAlreadyHovered(true);
-            hasHoveredInSession = true;
-        }
-    };
 
     function setPreviousProject() {
         if (!selectedProject) return;
@@ -99,7 +86,7 @@ const ProjectsPage = () => {
                     <div
                         key={project.id}
                         className="group relative w-full"
-                        onMouseEnter={() => handleMouseEnter(project.id)}
+                        onMouseEnter={() => setHoveredProjectId(project.id)}
                         onMouseLeave={() => setHoveredProjectId(null)}
                     >
                         <button
@@ -142,18 +129,6 @@ const ProjectsPage = () => {
                                 {project.year}
                             </span>
                         </button>
-
-                        {!alreadyHovered && index === 0 && (
-                            <div className="pointer-events-none absolute bottom-0 left-250 hidden aspect-square w-90 lg:block">
-                                <video
-                                    src={gif}
-                                    autoPlay
-                                    loop
-                                    muted
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                        )}
 
                         {hoveredProjectId === project.id && (
                             <ProjectPreview
