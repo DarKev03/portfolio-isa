@@ -1,0 +1,174 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{portfolio-informe}[2026/11/16 Informes imprimibles del portfolio]
+
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage[spanish,es-nodecimaldot]{babel}
+\RequirePackage[a4paper,left=23mm,right=23mm,top=21mm,bottom=20mm,headheight=16pt,includeheadfoot]{geometry}
+\RequirePackage{lmodern}
+\RequirePackage{microtype}
+\RequirePackage[table]{xcolor}
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{longtable}
+\RequirePackage{array}
+\RequirePackage{enumitem}
+\RequirePackage{amssymb}
+\RequirePackage{fancyhdr}
+\RequirePackage{lastpage}
+\RequirePackage{titlesec}
+\RequirePackage{tikz}
+\RequirePackage{ifthen}
+\RequirePackage{ragged2e}
+\RequirePackage{hyperref}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit}
+
+\definecolor{InformeInk}{HTML}{142B3A}
+\definecolor{InformeBlue}{HTML}{234C60}
+\definecolor{InformeTeal}{HTML}{328074}
+\definecolor{InformeSoft}{HTML}{F1F5F5}
+\definecolor{InformeGray}{HTML}{536671}
+\definecolor{InformeAmber}{HTML}{8B5C20}
+\definecolor{InformeRed}{HTML}{984D4A}
+\definecolor{InformeLine}{HTML}{DCE5E7}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=InformeBlue,
+  urlcolor=InformeBlue,
+  citecolor=InformeBlue,
+  pdftitle={Informe del estado del portfolio},
+  pdfauthor={Análisis del proyecto}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\emergencystretch}{4em}
+\renewcommand{\arraystretch}{1.3}
+\setlist[itemize]{leftmargin=1.5em,itemsep=3pt,topsep=4pt}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=3pt,topsep=4pt}
+
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\color{InformeInk}}
+  {\small\color{InformeTeal}\MakeUppercase{Sección}\enspace\thechapter}
+  {5pt}
+  {\Huge}
+  [\vspace{5pt}{\color{InformeTeal}\titlerule[1.2pt]}]
+\titlespacing*{\chapter}{0pt}{0pt}{22pt}
+\titleformat{\section}{\Large\bfseries\color{InformeInk}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\large\bfseries\color{InformeBlue}}{\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{InformeInk}}{\thesubsubsection}{0.7em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\bfseries\color{InformeBlue}ISABEL FAUBEL \enspace / \enspace PORTFOLIO}
+\fancyhead[R]{\footnotesize\color{InformeGray}ANÁLISIS DEL PROYECTO}
+\fancyfoot[L]{\footnotesize\color{InformeGray}Informe de situación \enspace • \enspace Uso interno}
+\fancyfoot[R]{\footnotesize\color{InformeGray}\thepage\ / \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\makeatletter
+\let\ps@plain\ps@fancy
+\makeatother
+
+\newcommand{\entregableportada}[3]{%
+  \begin{titlepage}
+    \thispagestyle{empty}
+    \pagenumbering{gobble}
+    \noindent{\color{InformeInk}\rule{\textwidth}{4pt}}\par
+    \vspace{13mm}
+    {\small\bfseries\color{InformeTeal} ISABEL FAUBEL \enspace / \enspace PORTFOLIO\par}
+    \vspace{28mm}
+    {\fontsize{31}{37}\selectfont\bfseries\color{InformeInk}#1\par}
+    \vspace{7mm}
+    {\Large\color{InformeBlue}#2\par}
+    \vspace{12mm}
+    {\color{InformeTeal}\rule{28mm}{2pt}\par}
+    \vfill
+    {\small\bfseries\color{InformeInk} DOCUMENTACIÓN DEL PROYECTO\par}
+    \vspace{3mm}
+    {\normalsize\color{InformeGray}#3\par}
+    \vspace{12mm}
+    {\color{InformeLine}\rule{\textwidth}{0.8pt}\par}
+    \vspace{3mm}
+    {\footnotesize\color{InformeGray} Preparado para revisión y seguimiento\par}
+  \end{titlepage}
+  \pagenumbering{arabic}
+}
+
+\newcommand{\rutaweb}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\archivo}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\prioridad}[1]{%
+  \ifthenelse{\equal{#1}{P0}}{\textcolor{InformeRed}{\textbf{P0}}}{%
+  \ifthenelse{\equal{#1}{P1}}{\textcolor{InformeAmber}{\textbf{P1}}}{%
+  \textcolor{InformeBlue}{\textbf{P2}}}}%
+}
+
+\newcounter{accion}[chapter]
+\newcommand{\tarea}[2]{%
+  \noalign{\stepcounter{accion}}%
+  {\footnotesize\bfseries\color{InformeGray}\thechapter.\arabic{accion}} &
+  {\footnotesize\prioridad{#1}} &
+  {\small\RaggedRight #2} &
+  \centering\arraybackslash $\square$ \tabularnewline
+  \arrayrulecolor{InformeLine}\hline
+}
+\newenvironment{listaacciones}{%
+  \setlength{\LTleft}{0pt}%
+  \setlength{\LTright}{0pt}%
+  \setlength{\tabcolsep}{4pt}%
+  \renewcommand{\arraystretch}{1.45}%
+  \begin{longtable}{@{}m{12mm}m{11mm}m{\dimexpr\textwidth-41mm-6\tabcolsep\relax}>{\centering\arraybackslash}m{18mm}@{}}
+  \rowcolor{InformeInk}
+  \color{white}\footnotesize\bfseries ID &
+  \color{white}\footnotesize\bfseries Prior. &
+  \color{white}\footnotesize\bfseries Acción / comprobación &
+  \color{white}\footnotesize\bfseries Hecho \tabularnewline
+  \endfirsthead
+  \rowcolor{InformeInk}
+  \color{white}\footnotesize\bfseries ID &
+  \color{white}\footnotesize\bfseries Prior. &
+  \color{white}\footnotesize\bfseries Acción / comprobación &
+  \color{white}\footnotesize\bfseries Hecho \tabularnewline
+  \endhead
+  \endfoot
+}{%
+  \end{longtable}%
+}
+
+\newcommand{\criteriocierre}[1]{%
+  \medskip
+  \noindent\colorbox{InformeSoft}{%
+    \parbox{\dimexpr\textwidth-2\fboxsep\relax}{%
+      \small\textbf{\color{InformeBlue}CRITERIO DE CIERRE} \enspace #1
+    }%
+  }%
+  \medskip
+}
+
+\newcommand{\evidencia}[1]{%
+  {\small\color{InformeGray}\textit{Evidencia: #1}}%
+}
+
+\tikzset{
+  informe caja/.style={
+    draw=InformeBlue,
+    rounded corners=3pt,
+    fill=InformeSoft,
+    text=InformeInk,
+    align=center,
+    inner sep=5pt,
+    minimum height=10mm
+  },
+  informe caja secundaria/.style={
+    draw=InformeGray,
+    rounded corners=3pt,
+    fill=white,
+    text=InformeInk,
+    align=center,
+    inner sep=6pt,
+    minimum height=9mm
+  },
+  informe flecha/.style={-{Stealth[length=2.2mm]},thick,draw=InformeTeal},
+  informe enlace/.style={thick,draw=InformeGray}
+}

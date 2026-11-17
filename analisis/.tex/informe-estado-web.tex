@@ -1,0 +1,223 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage{portfolio-informe}
+\renewcommand{\contentsname}{Índice}
+\renewcommand{\chaptername}{}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+
+\begin{document}
+
+\entregableportada
+  {Informe de estado}
+  {Portfolio web de Isabel Faubel}
+  {Diagnóstico funcional, operativo y de riesgos\\16 de noviembre de 2026}
+
+\tableofcontents
+\clearpage
+
+\chapter{Resumen ejecutivo}
+
+La web es actualmente un portfolio de una sola página (SPA) construido con React, TypeScript y Vite. Presenta portada, biografía, listado de proyectos y detalles de proyecto. El contenido de proyectos reside en un JSON del repositorio y no se observa una interfaz para que la cliente lo mantenga.
+
+La revisión local reproduce dos problemas visibles: el listado de proyectos desborda horizontalmente en un viewport móvil de 390 px, y una URL no reconocida muestra una página en blanco. La navegación de la portada permanece inicialmente invisible hasta una interacción. Estas observaciones son de la sesión local, no una certificación de producción.
+
+Antes de considerar la web preparada para entrega u operación por la cliente, se recomienda priorizar: confirmar titulares y licencia, acordar cómo se editarán los proyectos, resolver rutas y errores, validar móvil y accesibilidad y definir si se incorporarán traducciones, analítica y consentimiento.
+
+\section{Alcance de la revisión}
+
+El informe sintetiza la inspección estática del repositorio y la navegación puntual de \url{http://localhost:5173/}. No se modificó código. No se realizó auditoría legal, auditoría de seguridad, revisión de producción ni campaña completa de pruebas en navegadores, lectores de pantalla o dispositivos.
+
+Los detalles de estructura de código y responsabilidades de módulos se presentan por separado en \textit{Informe de arquitectura}. Las tareas de verificación están separadas en las checklists de resolución.
+
+\section{Estado general}
+
+\begin{tabularx}{\textwidth}{>{\bfseries}p{30mm} X X}
+\toprule
+Área & Situación observada & Consecuencia para la cliente \\
+\midrule
+Contenido & Los proyectos se importan de \archivo{src/assets/projects.json}. No se observa CMS, API ni base de datos conectada. & Los cambios requieren editar el repositorio y publicar una versión nueva. \\
+Rutas & Hay cuatro rutas declaradas y no hay ruta comodín. & Las direcciones no reconocidas no tienen una pantalla propia. \\
+Idioma & El selector EN/ES solo cambia su estado visual. & El contenido no se traduce. \\
+Licencia & \archivo{LICENSE} declara MIT y menciona a Kevin García. & MIT permite uso comercial; hay que confirmar titularidad y condiciones antes de reemplazarla. \\
+Medición & No se observan integraciones de analítica ni monitorización de errores en el código inspeccionado. & No hay métricas de visitas o errores observadas. \\
+Publicación & No se revisaron proveedor, dominio ni cabeceras HTTP. & Caché, rutas profundas y controles de producción deben validarse en el alojamiento real. \\
+\bottomrule
+\end{tabularx}
+
+\chapter{Mapa de páginas y navegación}
+
+\begin{center}
+\begin{tikzpicture}[node distance=11mm and 12mm]
+  \node[informe caja] (browser) {Navegador};
+  \node[informe caja,right=of browser] (router) {React Router\\\archivo{AppRouter}};
+  \node[informe caja,right=of router,yshift=21mm] (home) {Portada\\\rutaweb{/}};
+  \node[informe caja,right=of router,yshift=7mm] (about) {Sobre mí\\\rutaweb{/aboutme}};
+  \node[informe caja,right=of router,yshift=-7mm] (projects) {Proyectos\\\rutaweb{/projects}};
+  \node[informe caja,right=of router,yshift=-21mm] (detail) {Detalle\\\rutaweb{/projects/:id}};
+  \draw[informe flecha] (browser) -- (router);
+  \draw[informe flecha] (router.east) -- (home.west);
+  \draw[informe flecha] (router.east) -- (about.west);
+  \draw[informe flecha] (router.east) -- (projects.west);
+  \draw[informe flecha] (router.east) -- (detail.west);
+\end{tikzpicture}
+\end{center}
+
+\begin{tabularx}{\textwidth}{>{\bfseries}p{32mm} p{35mm} X}
+\toprule
+Ruta & Página & Función actual \\
+\midrule
+\rutaweb{/} & Portada & Lienzo de imágenes desplazable, título, navegación y acceso a contacto. \\
+\rutaweb{/aboutme} & Sobre mí & Biografía y experiencia con transiciones ligadas al scroll. \\
+\rutaweb{/projects} & Proyectos & Listado, vistas previas y apertura de detalle modal. \\
+\rutaweb{/projects/:id} & Detalle & Vista de proyecto en ruta independiente y carrusel horizontal. \\
+\bottomrule
+\end{tabularx}
+
+\section{Interacción de la persona visitante}
+
+\begin{center}
+\begin{tikzpicture}[
+  caja/.style={informe caja,text width=30mm,minimum height=14mm}
+]
+  \node[caja] (home) at (0,0) {Portada\\interacción inicial};
+  \node[caja] (nav) at (4.6,0) {Navegación\\Sobre mí / Proyectos};
+  \node[caja] (list) at (9.2,0) {Listado\\selección};
+  \node[caja] (modal) at (9.2,-2.1) {Detalle modal\\anterior / siguiente};
+  \node[caja] (about) at (4.6,-2.1) {Sobre mí\\contenido y scroll};
+  \draw[informe flecha] (home) -- (nav);
+  \draw[informe flecha] (nav) -- (list);
+  \draw[informe flecha] (nav) -- (about);
+  \draw[informe flecha] (list) -- (modal);
+\end{tikzpicture}
+\end{center}
+
+El esquema describe la interacción existente, no un flujo editorial. El detalle modal no cambia la URL; la ruta \rutaweb{/projects/:id} es una presentación independiente. El acceso a contacto se gestiona solo en la portada y requiere revisión.
+
+\section{Comportamiento observado en local}
+
+\begin{tabularx}{\textwidth}{>{\bfseries}p{37mm} X}
+\toprule
+Ruta o estado & Resultado medido \\
+\midrule
+\rutaweb{/} & Carga. Tras 2,5 s sin interacción en un viewport de 390 px, la opacidad calculada del contenedor de navegación era 0. \\
+\rutaweb{/aboutme} & Carga; no se observó desbordamiento horizontal en la medición puntual de 390 px. Esto no acredita una adaptación completa. \\
+\rutaweb{/projects} & Desbordamiento horizontal reproducido: documento de 1160 px frente a 375 px de área de viewport, con ventana de 390 px. También se apreció barra horizontal en la captura de escritorio. \\
+\rutaweb{/projects/1} & Carga el detalle de Lazos; no se observó desbordamiento horizontal en la medición puntual de 390 px. \\
+\rutaweb{/url-inexistente} & Página sin contenido visible y advertencia de React Router: \textit{No routes matched location}. \\
+Título de pestaña & Se mantiene \textit{temp-project} en las rutas probadas. \\
+\bottomrule
+\end{tabularx}
+
+\chapter{Contenido y operación}
+
+\section{Cómo se mantiene hoy el portfolio}
+
+Los datos están en \archivo{src/assets/projects.json}. El flujo actual requiere modificar ese archivo, actualizar imágenes y bloques, revisar el contrato en \archivo{src/types/Project.ts} y \archivo{src/types/ContentBlock.ts}, y volver a generar/publicar la aplicación.
+
+No se observa una interfaz de edición, gestión de usuarios, borradores, flujo de aprobación o almacenamiento propio de medios. Las imágenes actuales del JSON usan URLs externas de \textit{picsum.photos}. Una base de datos por sí sola no resolvería la necesidad de edición: hace falta decidir también interfaz, permisos, validación, almacenamiento y publicación.
+
+\section{Flujo actual para publicar contenido}
+
+\begin{center}
+\begin{tikzpicture}[caja/.style={informe caja,text width=27mm,minimum height=14mm}]
+  \node[caja] (edit) at (0,0) {Edición técnica\\del JSON};
+  \node[caja] (check) at (3.9,0) {Revisión de\\datos y recursos};
+  \node[caja] (build) at (7.8,0) {Generación\\y despliegue};
+  \node[caja] (web) at (11.7,0) {Web publicada\\contenido};
+  \draw[informe flecha] (edit) -- (check);
+  \draw[informe flecha] (check) -- (build);
+  \draw[informe flecha] (build) -- (web);
+\end{tikzpicture}
+\end{center}
+
+Este es el proceso técnico necesario con los archivos actuales. No existe actualmente un panel de carga o publicación para la cliente.
+
+\section{Opciones que requieren decisión}
+
+\begin{itemize}
+  \item \textbf{Mantener JSON:} adecuado si los cambios son poco frecuentes y una persona técnica publica cada versión.
+  \item \textbf{CMS alojado:} adecuado si la cliente necesita edición visual; valorar coste, roles, exportación, privacidad y dependencia del proveedor.
+  \item \textbf{CMS/API propios:} permite control específico, pero añade responsabilidad de autenticación, permisos, validación, almacenamiento, respaldos, mantenimiento y seguridad.
+\end{itemize}
+
+Antes de elegir, la cliente debe confirmar quién crea y publica proyectos, campos y tipos de bloque, idiomas, proceso de revisión, requisitos de carga de imágenes, autorizaciones y recuperación de contenido.
+
+\chapter{Derechos y licencia}
+
+\archivo{LICENSE} declara MIT y atribuye el aviso de copyright a Kevin García. MIT permite modificar y vender copias del software conforme a sus términos; por ello, no responde al objetivo expresado de exigir autorización/pago para el uso comercial.
+
+\textbf{La licencia no debe sustituirse sin verificar los derechos.} Deben identificarse titulares y autorizaciones del código, diseño, textos, fotografías, fuentes, marca y contribuciones de terceros. Los materiales de terceros pueden tener condiciones distintas. La redacción o revisión de la licencia final debe realizarla una persona con competencia legal.
+
+\chapter{Experiencia, compatibilidad y recursos}
+
+\section{Adaptación y accesibilidad}
+
+En \rutaweb{/projects} existe un desbordamiento horizontal medido en móvil. Las mediciones puntuales de las otras rutas no mostraron el mismo desbordamiento, pero no constituyen una revisión responsive integral. Deben probarse las páginas, modal y carrusel en tamaños objetivo, teclado, foco, lector de pantalla y movimiento reducido.
+
+La navegación de portada se muestra después de interacción de puntero/rueda; debe verificarse su descubribilidad con teclado. En otras áreas hay elementos no semánticos utilizados como controles. El texto \textit{(download CV)} no está asociado a una descarga. El cierre del modal de contacto y del modal de proyecto requiere revisión funcional y accesible.
+
+\section{Tipografía, imágenes y caché}
+
+\archivo{src/index.css} importa Castoro desde Google Fonts y declara CirrusCumulus localmente. La tipografía local declarada no demuestra por sí sola que sea un fallback visual adecuado. Los componentes solicitan Castoro y especifican una familia genérica de respaldo; hay que comprobar legibilidad cuando falla la fuente remota y verificar licencias.
+
+No se observa service worker ni estrategia de caché propia de la aplicación. Esto no demuestra que los recursos se descarguen de nuevo en cada visita: el navegador y las cabeceras del servidor intervienen. Para decidir cambios hay que medir en el sitio publicado las respuestas y cabeceras \texttt{Cache-Control}, \texttt{ETag} y \texttt{Last-Modified}.
+
+\section{Metadatos y JavaScript}
+
+\archivo{index.html} conserva el título \textit{temp-project}, el favicon de Vite y \texttt{lang="en"} aunque la interfaz observada está en español. No se observa un manifest web ni un mensaje \texttt{\textless noscript\textgreater}. La necesidad de instalar la web como PWA debe decidirse explícitamente; añadir un manifest sin otros requisitos no crea una experiencia offline.
+
+\chapter{Seguridad, privacidad y observabilidad}
+
+La revisión no permite afirmar que el sitio carezca de toda seguridad. La aplicación inspeccionada es principalmente cliente, pero la seguridad depende también de dependencias, configuración, publicación y recursos externos. No se revisó el entorno desplegado ni se ejecutó una auditoría de seguridad.
+
+No se observan analítica de visitas, monitorización de errores ni gestión de consentimiento en el código consultado. Si la cliente quiere medición, se debe acordar finalidad, proveedor, datos, retención y obligaciones aplicables antes de integrarla. La gestión de cookies/consentimiento se valorará con la cliente según tecnologías y contexto; no se ha emitido una conclusión legal.
+
+\chapter{Prioridades recomendadas}
+
+\begin{tabularx}{\textwidth}{>{\bfseries}p{20mm} p{47mm} X}
+\toprule
+Prioridad & Trabajo & Resultado esperado \\
+\midrule
+P0 & Acordar titularidad, licencias y usos comerciales; decidir flujo editorial y alcance de idiomas/medición. & Evitar decisiones de arquitectura o entrega incompatibles con derechos y necesidades. \\
+P1 & Resolver 404/errores, desbordamiento móvil, controles no semánticos y visibilidad de navegación. & La web permite recorrer las rutas y acciones principales sin estados en blanco ni barreras básicas. \\
+P1 & Decidir y probar el flujo de gestión de proyectos. & La cliente puede mantener contenido según el alcance acordado. \\
+P2 & Medir caché, recursos y rendimiento en producción; revisar tipografía y recursos externos. & Mejoras basadas en evidencia, no en supuestos. \\
+Según alcance & Implementar i18n, analítica/consentimiento, monitorización y PWA solo si se aprueban. & Funciones alineadas con una finalidad y con responsables claros. \\
+\bottomrule
+\end{tabularx}
+
+\begin{center}
+\begin{tikzpicture}[node distance=9mm and 7mm]
+  \node[informe caja] (decisions) {Decisiones\\de cliente};
+  \node[informe caja,right=of decisions] (baseline) {Correcciones\\de base};
+  \node[informe caja,right=of baseline] (features) {Funciones\\aprobadas};
+  \node[informe caja,right=of features] (validation) {Validación y\\entrega};
+  \draw[informe flecha] (decisions) -- (baseline);
+  \draw[informe flecha] (baseline) -- (features);
+  \draw[informe flecha] (features) -- (validation);
+\end{tikzpicture}
+\end{center}
+
+\section{Decisiones para la cliente}
+
+\begin{enumerate}
+  \item ¿Quién posee el código, contenido, fotografías, fuentes y marca? ¿Qué uso comercial se quiere permitir y bajo qué acuerdo?
+  \item ¿Quién actualizará proyectos? ¿Hace falta edición sin asistencia técnica, revisión, borradores o publicación programada?
+  \item ¿Qué idiomas deben ofrecerse y quién aporta/revisa las traducciones?
+  \item ¿Se medirán visitas y errores? ¿Qué métricas y proveedores se consideran?
+  \item ¿Se necesita instalación/PWA o basta con la web responsive?
+  \item ¿Se publicará CV y quién lo mantendrá actualizado?
+\end{enumerate}
+
+\chapter{Referencias de proyecto}
+
+\begin{itemize}
+  \item Rutas: \archivo{src/routes/AppRouter.tsx}
+  \item Páginas: \archivo{src/pages/}
+  \item Datos: \archivo{src/assets/projects.json}
+  \item Tipos: \archivo{src/types/Project.ts} y \archivo{src/types/ContentBlock.ts}
+  \item Licencia y documento HTML: \archivo{LICENSE}, \archivo{index.html}
+  \item Informes relacionados: \archivo{informe-arquitectura.tex}, \archivo{checklist-resolucion-web.tex}
+\end{itemize}
+
+\end{document}

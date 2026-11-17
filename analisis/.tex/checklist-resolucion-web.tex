@@ -1,0 +1,90 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage{portfolio-informe}
+\renewcommand{\contentsname}{Índice}
+\renewcommand{\chaptername}{}
+\setcounter{secnumdepth}{1}
+\setcounter{tocdepth}{1}
+
+\begin{document}
+
+\entregableportada
+  {Checklist de resolución}
+  {Estado general del portfolio web}
+  {Documento de seguimiento independiente\\16 de noviembre de 2026}
+
+\section*{Cómo utilizar este documento}
+
+Cada fila tiene un identificador, prioridad y casilla. Marca la casilla solo después de completar y verificar la tarea.
+
+\begin{itemize}
+  \item \textbf{P0:} decisión o bloqueo previo a la entrega/publicación.
+  \item \textbf{P1:} funcionamiento correcto, experiencia o riesgo importante.
+  \item \textbf{P2:} mejora de calidad/mantenimiento según alcance.
+  \item \textbf{DECISIÓN:} necesita acuerdo de la cliente o asesoramiento.
+  \item \textbf{VERIFICACIÓN:} no marcar como completada sin evidencia.
+\end{itemize}
+
+\tableofcontents
+\clearpage
+
+\chapter{Páginas y navegación}
+
+\begin{listaacciones}  \tarea{P1}{Portada: decidir cuándo aparece la navegación y hacerla accesible también con teclado.}  \tarea{P1}{Proyectos: corregir el desbordamiento reproducido a 390 px y validar el diseño aprobado.}  \tarea{P1}{Detalle: decidir y probar el orden de anterior/siguiente y los límites de la lista.}  \tarea{P1}{Contacto: confirmar una acción funcional para cada instancia de navegación.}  \tarea{P1}{CV: confirmar si se publicará; si se aprueba, vincular el documento vigente con control accesible.}  \tarea{P2}{Validar con la cliente nombres, textos, años, imágenes, etiquetas y datos de contacto.}  \tarea{P2}{Confirmar titularidad, permisos y textos alternativos de las imágenes.}  \tarea{P1}{Probar apertura/cierre de modales con ratón, teclado y touch.}
+\end{listaacciones}
+\criteriocierre{Las rutas y acciones acordadas funcionan en las modalidades de entrada seleccionadas y el contenido cuenta con aprobación de la cliente.}
+
+\chapter{Gestión de contenido y CMS}
+
+\begin{listaacciones}  \tarea{P0}{Acordar quién crea, revisa y publica proyectos y con qué frecuencia.}  \tarea{P0}{Elegir entre JSON con asistencia técnica, CMS alojado o gestión/API propia; registrar presupuesto y motivos.}  \tarea{P1}{Aprobar campos, bloques, idiomas, límites y validaciones.}  \tarea{P1}{Definir almacenamiento de imágenes, formatos, compresión, texto alternativo y derechos.}  \tarea{P1}{Definir usuarios, roles, autenticación y permisos si existe panel/API.}  \tarea{P1}{Probar crear, previsualizar, publicar, editar, retirar y recuperar contenido.}  \tarea{P2}{Decidir el destino de los cinco proyectos actuales y validar su migración, si aplica.}  \tarea{P2}{Aprobar \archivo{double-image}: implementar su presentación o retirar el tipo no soportado.}
+\end{listaacciones}
+\criteriocierre{La usuaria completa el flujo editorial aprobado sin modificar código y existe una recuperación probada.}
+
+\chapter{Licencia, autoría y derechos}
+
+\begin{listaacciones}  \tarea{P0}{Identificar titulares/autorizaciones de código, diseño, textos, imágenes, fuentes, marca y contribuciones.}  \tarea{P0}{Definir usos permitidos y comerciales, autorización, pago y atribución requerida.}  \tarea{P0}{Revisar/redactar la licencia con asesoramiento legal; contrastar MIT actual y el aviso de copyright.}  \tarea{P0}{Separar condiciones de terceros que no puedan relicenciarse junto con el proyecto.}  \tarea{P1}{Actualizar avisos únicamente tras aprobación de titulares y condiciones.}
+\end{listaacciones}
+\criteriocierre{La licencia y los avisos corresponden a derechos acreditados; no quedan materiales de terceros asumidos como propiedad de la cliente.}
+
+\chapter{Rutas, errores y estados degradados}
+
+\begin{listaacciones}  \tarea{P1}{Añadir una respuesta de ruta 404 con navegación de salida.}  \tarea{P1}{Definir recuperación ante errores de renderizado y carga, con mensajes útiles.}  \tarea{P1}{Probar ID no numérico, inexistente, primero y último; hacer consistente la navegación.}  \tarea{P1}{Verificar acceso directo y recarga de rutas en el alojamiento de producción.}  \tarea{P1}{Probar imágenes, vídeos y fuentes inaccesibles sin bloquear el resto de la página.}  \tarea{P2}{Actualizar título, favicon e idioma del documento.}
+\end{listaacciones}
+\criteriocierre{Rutas válidas, desconocidas y fallidas tienen una respuesta deliberada en desarrollo y producción.}
+
+\chapter{Experiencia, accesibilidad y adaptación}
+
+\begin{listaacciones}  \tarea{P1}{Resolver el overflow de \rutaweb{/projects}: documento medido en 1160 px con viewport de 390 px.}  \tarea{P1}{Probar las cuatro páginas, modal y carrusel en móvil, tablet y escritorio.}  \tarea{P1}{Verificar navegación con teclado, orden y visibilidad de foco y activación de controles.}  \tarea{P1}{Corregir elementos interactivos no semánticos cuando proceda.}  \tarea{P1}{Probar movimiento reducido y asegurar que la animación no oculta contenido/controles.}  \tarea{P2}{Clasificar imágenes decorativas/informativas y completar textos alternativos pertinentes.}  \tarea{P2}{Guardar capturas comparables por ruta, dispositivo y estado.}
+\end{listaacciones}
+\criteriocierre{La web es legible y operable en los tamaños y modalidades aprobados, con evidencia de prueba.}
+
+\chapter{Idiomas}
+
+\begin{listaacciones}  \tarea{P0}{Confirmar idiomas, alcance y responsable de traducciones.}  \tarea{P1}{Elegir estrategia de internacionalización y trasladar textos a recursos localizados.}  \tarea{P1}{Conectar el selector al idioma real de páginas, errores, proyectos y metadatos.}  \tarea{P1}{Definir persistencia del idioma y su representación en la URL.}  \tarea{P2}{Revisar formatos de fechas, etiquetas y textos traducidos.}
+\end{listaacciones}
+\criteriocierre{Los idiomas aprobados están completos o el selector se retira hasta poder ofrecerlos.}
+
+\chapter{Analítica, errores y consentimiento}
+
+\begin{listaacciones}  \tarea{P0}{Decidir si se miden visitas y errores y con qué finalidad.}  \tarea{P0}{Evaluar proveedor, datos, retención, ubicación y accesos con la cliente.}  \tarea{P1}{Determinar con asesoramiento adecuado qué consentimiento y controles aplican.}  \tarea{P1}{Si se aprueba, implementar medición con minimización de datos y sin datos sensibles.}  \tarea{P1}{Probar aceptar, rechazar, retirar y persistir preferencias cuando aplique.}  \tarea{P2}{Acordar responsable, umbrales y respuesta a alertas.}
+\end{listaacciones}
+\criteriocierre{Herramientas activas, avisos y controles coinciden; la decisión de no añadir analítica también queda registrada.}
+
+\chapter{Recursos, caché y rendimiento}
+
+\begin{listaacciones}  \tarea{P1}{Medir cabeceras \texttt{Cache-Control}, \texttt{ETag} y \texttt{Last-Modified} en producción.}  \tarea{P1}{Comparar primera y segunda visita; no deducir caché solo por ausencia de service worker.}  \tarea{P1}{Decidir origen de imágenes/fuentes y comprobar permisos de uso.}  \tarea{P1}{Bloquear Google Fonts y validar legibilidad, fallback y carga de fuente local.}  \tarea{P2}{Medir peso/carga de imágenes y vídeo antes de optimizar.}  \tarea{P2}{Acordar objetivos medibles de rendimiento.}
+\end{listaacciones}
+\criteriocierre{La estrategia se basa en mediciones del sitio publicado y se verifica en visitas repetidas y red limitada.}
+
+\chapter{JavaScript, metadatos y PWA}
+
+\begin{listaacciones}  \tarea{P1}{Añadir explicación \texttt{\textless noscript\textgreater} y probar con JavaScript desactivado.}  \tarea{P1}{Sustituir título y favicon de plantilla y corregir el atributo \texttt{lang}.}  \tarea{P2}{Decidir si la instalación/PWA es requisito o queda fuera de alcance.}  \tarea{P2}{Si se aprueba PWA, definir manifest, iconos, offline, service worker y actualizaciones.}
+\end{listaacciones}
+\criteriocierre{La experiencia sin scripts está explicada y el alcance PWA está aprobado o descartado explícitamente.}
+
+\chapter{Calidad, seguridad y publicación}
+
+\begin{listaacciones}  \tarea{P1}{Ejecutar \texttt{npm run lint} y \texttt{npm run build}; registrar versión de Node.js, salida y advertencias.}  \tarea{P1}{Acordar pruebas automatizadas; el proyecto no declara actualmente script de tests.}  \tarea{P1}{Verificar navegadores y dispositivos acordados.}  \tarea{P1}{Revisar proveedor, dominio, HTTPS, reglas SPA, cabeceras y proceso de despliegue.}  \tarea{P1}{Realizar revisión de seguridad acorde con la arquitectura final y cualquier CMS/API/carga.}  \tarea{P2}{Documentar copias, restauración, propiedad de cuentas y mantenimiento.}  \tarea{P2}{Decidir si \archivo{analisis} se versiona: actualmente \archivo{.gitignore} excluye la carpeta; no cambiar la regla sin autorización.}
+\end{listaacciones}
+\criteriocierre{La entrega se valida en el entorno acordado y existe responsable de operación/recuperación.}
+
+\end{document}
