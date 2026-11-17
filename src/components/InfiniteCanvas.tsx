@@ -63,7 +63,13 @@ const InfiniteCanvas = () => {
   const [viewH, setViewH] = useState(typeof window !== "undefined" ? window.innerHeight : 800);
 
   useEffect(() => {
-    if (reducedMotion) setIsPlaying(false);
+    if (reducedMotion) {
+      setIsPlaying(false);
+      if (inertiaFrameRef.current !== null) {
+        cancelAnimationFrame(inertiaFrameRef.current);
+        inertiaFrameRef.current = null;
+      }
+    }
   }, [reducedMotion]);
 
   const stopMotion = () => {
