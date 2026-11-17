@@ -7,7 +7,9 @@ import Title from "../components/Title";
 
 const ProjectDetailPage = () => {
     const { id } = useParams<{ id: string }>();
-    const project = (projectsData as Project[]).find(p => p.id === Number(id));
+    const projectList: Project[] = projectsData as Project[];
+    const projectIndex = projectList.findIndex(p => p.id === Number(id));
+    const project = projectList[projectIndex];
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
     const [emblaRef] = useEmblaCarousel({
@@ -24,6 +26,9 @@ const ProjectDetailPage = () => {
             </div>
         );
     }
+
+    const previousProject = projectList[(projectIndex - 1 + projectList.length) % projectList.length];
+    const nextProject = projectList[(projectIndex + 1) % projectList.length];
 
     const renderBlock = (block: ContentBlock, index: number, total: number) => {
         const isFirst = index === 0;
@@ -83,8 +88,8 @@ const ProjectDetailPage = () => {
                 <Title />
                 <div className="flex flex-row mt-auto ml-auto gap-5 justify-between text-base font-normal italic text-gray-400">
                     <Link to="/projects" className="hover:text-black transition-colors pr-35">{`( proyectos )`}</Link>
-                    <Link to={`/projects/${project.id - 1}`} className="cursor-pointer hover:text-black transition-colors">{`( atras )`}</Link>
-                    <Link to={`/projects/${project.id + 1}`} className="cursor-pointer hover:text-black transition-colors">{`( siguiente )`}</Link>
+                    <Link to={`/projects/${previousProject.id}`} className="cursor-pointer hover:text-black transition-colors">{`( atras )`}</Link>
+                    <Link to={`/projects/${nextProject.id}`} className="cursor-pointer hover:text-black transition-colors">{`( siguiente )`}</Link>
                 </div>
             </div>
 
