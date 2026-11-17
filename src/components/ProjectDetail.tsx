@@ -7,7 +7,44 @@ import { ContentBlock } from "../types/ContentBlock";
 import { readImage, splitProjectContent } from "../contentful/projects";
 import { useTranslation } from "../i18n/translations";
 import { useLanguage } from "../i18n/languageContext";
-import type { KeyboardEvent } from "react";
+import { useLayoutEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
+
+const ProjectSection = ({ children }: { children: ReactNode }) => {
+    const viewportRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+        const viewport = viewportRef.current;
+        const content = contentRef.current;
+        if (!viewport || !content) return;
+
+        const updateScale = () => {
+            if (!viewport.clientWidth || !viewport.clientHeight || !content.scrollWidth || !content.scrollHeight) return;
+            const scale = Math.min(
+                1,
+                viewport.clientWidth / content.scrollWidth,
+                viewport.clientHeight / content.scrollHeight,
+            );
+            content.style.transform = `scale(${scale})`;
+        };
+
+        const observer = new ResizeObserver(updateScale);
+        observer.observe(viewport);
+        observer.observe(content);
+        updateScale();
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+        <div tabIndex={0} className="flex-none w-1/2 h-full px-4 py-10 text-[clamp(0.875rem,1.111vw,1.25rem)] sm:px-6" style={{ fontFamily: "'Castoro', serif" }}>
+            <div ref={viewportRef} className="h-full overflow-clip">
+                <div ref={contentRef} className="origin-top-left space-y-4 break-words [&_table]:w-full [&_table]:table-fixed">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 interface ProjectDetailProps {
     project: DisplayProject;
@@ -186,19 +223,17 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
 
                     {"richContent" in project
                         ? splitProjectContent(project.richContent).map((section, index) => (
-                            <div key={index} tabIndex={0} className="flex-none w-1/2 h-full overflow-y-auto px-4 py-10 text-[clamp(0.875rem,1.111vw,1.25rem)] sm:px-6" style={castoroFamily}>
-                                <div className="space-y-4 break-words [&_table]:w-full [&_table]:table-fixed">
-                                    {documentToReactComponents(
-                                        section,
-                                        { renderNode: {
-                                            [BLOCKS.EMBEDDED_ASSET]: node => {
-                                                const image = readImage(node.data.target, project.title, language);
-                                                return <img src={image.url} alt={image.alt} className="w-full h-auto object-contain" />;
-                                            },
-                                        } },
-                                    )}
-                                </div>
-                            </div>
+                            <ProjectSection key={index}>
+                                {documentToReactComponents(
+                                    section,
+                                    { renderNode: {
+                                        [BLOCKS.EMBEDDED_ASSET]: node => {
+                                            const image = readImage(node.data.target, project.title, language);
+                                            return <img src={image.url} alt={image.alt} className="w-full h-auto object-contain" />;
+                                        },
+                                    } },
+                                )}
+                            </ProjectSection>
                         ))
                         : project.content?.map((block, index) =>
                             renderBlock(block, index, project.content?.length || 0)
