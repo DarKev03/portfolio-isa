@@ -4,12 +4,14 @@ import ProjectsPage from '../pages/ProjectsPage';
 import AboutMe from '../pages/AboutMe.tsx';
 import NotFoundPage from '../pages/NotFoundPage';
 import PageErrorBoundary from '../components/PageErrorBoundary';
+import { useTranslation } from '../i18n/translations';
 
 const PageRoutes = () => {
     const { pathname } = useLocation();
+    const text = useTranslation();
 
     return (
-        <PageErrorBoundary pathname={pathname}>
+        <PageErrorBoundary pathname={pathname} text={text}>
             <Routes>
                 <Route path="/" element={<MainPage />} />
                 <Route path="/aboutme" element={<AboutMe />} />

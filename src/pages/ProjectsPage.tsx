@@ -7,10 +7,12 @@ import ProjectModal from "../components/ProjectModal";
 import ProjectPreview from "../components/ProjectPreview";
 import gsap from 'gsap';
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "../i18n/translations";
 
 let hasHoveredInSession = false;
 
 const ProjectsPage = () => {
+    const text = useTranslation();
     const backgroundRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
@@ -164,14 +166,14 @@ const ProjectsPage = () => {
                 ))}
             </div>
 
-            {projectsState.status === "loading" && <p role="status" className="p-8">Cargando proyectos…</p>}
+            {projectsState.status === "loading" && <p role="status" className="p-8">{text.loadingProjects}</p>}
             {projectsState.status === "error" && <p role="alert" className="p-8">{projectsState.message}</p>}
-            {projectsState.status === "ready" && projectList.length === 0 && <p role="status" className="p-8">No hay proyectos publicados.</p>}
+            {projectsState.status === "ready" && projectList.length === 0 && <p role="status" className="p-8">{text.noProjects}</p>}
 
             {projectsState.status === "ready" && id && !selectedProject && (
                 <div role="status" className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[rgba(255,254,253,1)]">
-                    <p>Proyecto no encontrado</p>
-                    <Link to="/projects" className="mt-4 underline">Volver a proyectos</Link>
+                    <p>{text.projectNotFound}</p>
+                    <Link to="/projects" className="mt-4 underline">{text.backToProjects}</Link>
                 </div>
             )}
 

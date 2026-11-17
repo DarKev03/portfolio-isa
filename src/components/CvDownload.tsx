@@ -2,18 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import { ContentfulDataError } from "../contentful/client";
 import { fetchCv } from "../contentful/cv";
 import type { Language } from "../types/Language";
+import { useTranslation } from "../i18n/translations";
 
 type CvState =
     | { status: "loading" }
     | { status: "unavailable" }
     | { status: "ready"; url: string }
-    | { status: "error"; message: string };
+    | { status: "error"; error: unknown };
 
 interface CvDownloadProps {
     language: Language;
 }
 
 const CvDownload = ({ language }: CvDownloadProps) => {
+    const text = useTranslation();
     const [state, setState] = useState<CvState>({ status: "loading" });
     const [isDownloading, setIsDownloading] = useState(false);
     const [downloadError, setDownloadError] = useState("");
@@ -28,9 +30,7 @@ const CvDownload = ({ language }: CvDownloadProps) => {
             error => {
                 if (isActive) setState({
                     status: "error",
-                    message: error instanceof ContentfulDataError
-                        ? error.message
-                        : "No se pudo cargar el CV. Comprueba la conexión y la configuración de Contentful.",
+                    error,
                 });
             },
         );
@@ -67,7 +67,7 @@ const CvDownload = ({ language }: CvDownloadProps) => {
             }
         } catch {
             if (!controller.signal.aborted) {
-                setDownloadError("No se pudo descargar el CV. Inténtalo de nuevo.");
+                setDownloadError(text.cvDownloadError);
             }
         } finally {
             if (!controller.signal.aborted) {
@@ -85,11 +85,11 @@ const CvDownload = ({ language }: CvDownloadProps) => {
                 disabled={state.status !== "ready" || isDownloading}
                 className="text-lg font-normal leading-tight italic text-[#4c4c4c9e] enabled:cursor-pointer enabled:hover:text-[#414141] disabled:cursor-not-allowed"
             >
-                {language === "es" ? "( descargar CV )" : "( download CV )"}
+                ( {text.downloadCv} )
             </button>
-            {state.status === "loading" && <p role="status" className="text-sm">Cargando CV…</p>}
-            {state.status === "unavailable" && <p role="status" className="text-sm">CV no publicado en este idioma.</p>}
-            {state.status === "error" && <p role="alert" className="text-sm">{state.message}</p>}
+            {state.status === "loading" && <p role="status" className="text-sm">{text.loadingCv}</p>}
+            {state.status === "unavailable" && <p role="status" className="text-sm">{text.unavailableCv}</p>}
+            {state.status === "error" && <p role="alert" className="text-sm">{state.error instanceof ContentfulDataError ? state.error.forLanguage(language) : text.cvLoadError}</p>}
             {downloadError && <p role="alert" className="text-sm">{downloadError}</p>}
         </div>
     );

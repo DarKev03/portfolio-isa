@@ -1,5 +1,6 @@
 import { useEffect, useRef, type RefObject } from "react";
 import gsap from "gsap";
+import { useTranslation } from "../i18n/translations";
 
 interface ContactModalProps {
     onClose: () => void;
@@ -7,6 +8,7 @@ interface ContactModalProps {
 }
 
 const ContactModal = ({ onClose, returnFocusRef }: ContactModalProps) => {
+    const text = useTranslation();
     const modalRef = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
@@ -45,14 +47,14 @@ const ContactModal = ({ onClose, returnFocusRef }: ContactModalProps) => {
             }}
             className="fixed inset-0 m-0 h-screen max-h-none w-screen max-w-none border-0 bg-[linear-gradient(to_bottom,#FFFEFD_0%,#FFFEFD_33.333%,rgba(255,255,255,0)_100%)] p-0 backdrop:bg-transparent"
         >
-            <h2 id="contact-title" className="sr-only">Contacto</h2>
+            <h2 id="contact-title" className="sr-only">{text.contact}</h2>
             <button
                 type="button"
                 onClick={onClose}
                 className="absolute right-8 top-8 cursor-pointer italic text-[#414141] hover:text-black"
                 style={{ fontFamily: "'Castoro', serif" }}
             >
-                ( cerrar )
+                ( {text.close} )
             </button>
             <div
                 className="absolute left-0 flex flex-col p-8 italic text-[#414141] font-normal text-md"

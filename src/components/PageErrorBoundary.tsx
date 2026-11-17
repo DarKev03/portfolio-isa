@@ -1,8 +1,10 @@
 import { Component, type ReactNode } from "react";
+import type { Translations } from "../i18n/translations";
 
 interface PageErrorBoundaryProps {
     pathname: string;
     children: ReactNode;
+    text: Translations;
 }
 
 interface PageErrorBoundaryState {
@@ -51,12 +53,12 @@ class PageErrorBoundary extends Component<PageErrorBoundaryProps, PageErrorBound
             >
                 {this.state.hasRetried ? (
                     <div role="alert">
-                        <h1 className="text-2xl font-normal">No se pudo mostrar la página</h1>
-                        <p className="mt-2">Se ha producido un error incluso después de volver a intentarlo.</p>
-                        <a href="/" className="mt-6 inline-block underline">Volver al inicio</a>
+                        <h1 className="text-2xl font-normal">{this.props.text.pageError}</h1>
+                        <p className="mt-2">{this.props.text.pageErrorDetails}</p>
+                        <a href="/" className="mt-6 inline-block underline">{this.props.text.backHome}</a>
                     </div>
                 ) : (
-                    <p role="status">Reintentando mostrar la página…</p>
+                    <p role="status">{this.props.text.retryingPage}</p>
                 )}
             </main>
         );

@@ -13,19 +13,19 @@ const assetSchema = z.object({
 
 export function readImage(value: unknown, fallbackAlt: string) {
     const asset = assetSchema.safeParse(value);
-    if (!asset.success) throw new ContentfulDataError("Una imagen de Contentful no está disponible.");
+    if (!asset.success) throw new ContentfulDataError("Una imagen de Contentful no está disponible.", "A Contentful image is unavailable.");
 
     const rawUrl = asset.data.fields.file.url;
     let url: URL;
     try {
         url = new URL(rawUrl.startsWith("//") ? `https:${rawUrl}` : rawUrl);
     } catch {
-        throw new ContentfulDataError("Una imagen de Contentful tiene una URL inválida.");
+        throw new ContentfulDataError("Una imagen de Contentful tiene una URL inválida.", "A Contentful image has an invalid URL.");
     }
 
     const allowedHosts = ["images.ctfassets.net", "images.eu.ctfassets.net"];
     if (url.protocol !== "https:" || url.username || url.password || url.port || !allowedHosts.includes(url.hostname)) {
-        throw new ContentfulDataError("Una imagen de Contentful tiene un origen no permitido.");
+        throw new ContentfulDataError("Una imagen de Contentful tiene un origen no permitido.", "A Contentful image has a disallowed origin.");
     }
 
     return {
@@ -69,7 +69,7 @@ function validateNodes(node: Block | Inline, title: string): void {
         BLOCKS.EMBEDDED_ASSET, INLINES.HYPERLINK,
     ];
     if (!supportedNodes.includes(node.nodeType)) {
-        throw new ContentfulDataError("El proyecto contiene un bloque no compatible.");
+        throw new ContentfulDataError("El proyecto contiene un bloque no compatible.", "The project contains an unsupported block.");
     }
     if (node.nodeType === BLOCKS.EMBEDDED_ASSET) {
         readImage(node.data.target, title);
@@ -77,7 +77,7 @@ function validateNodes(node: Block | Inline, title: string): void {
     if (node.nodeType === INLINES.HYPERLINK) {
         const href = z.string().safeParse(node.data.uri);
         if (!href.success || !/^(https?:|mailto:)/i.test(href.data)) {
-            throw new ContentfulDataError("El proyecto contiene un enlace no permitido.");
+            throw new ContentfulDataError("El proyecto contiene un enlace no permitido.", "The project contains a disallowed link.");
         }
     }
     for (const child of node.content) {
@@ -112,13 +112,16 @@ export function parseProject(value: unknown): CmsProject {
     const result = entrySchema.safeParse(value);
     if (!result.success) {
         const fields = [...new Set(result.error.issues.map(issue => issue.path.slice(0, 2).join(".")))];
-        throw new ContentfulDataError(`Un proyecto publicado tiene campos incompletos o inválidos: ${fields.join(", ")}.`);
+        throw new ContentfulDataError(
+            `Un proyecto publicado tiene campos incompletos o inválidos: ${fields.join(", ")}.`,
+            `A published project has missing or invalid fields: ${fields.join(", ")}.`,
+        );
     }
 
     const { sys, fields } = result.data;
     const image = readImage(fields.portada, fields.titulo);
     if (!isDocument(fields.textoProyecto)) {
-        throw new ContentfulDataError("El texto enriquecido de un proyecto no es válido.");
+        throw new ContentfulDataError("El texto enriquecido de un proyecto no es válido.", "A project's rich text is invalid.");
     }
     for (const node of fields.textoProyecto.content) validateNodes(node, fields.titulo);
 
@@ -148,7 +151,7 @@ export async function fetchProjects(locale: "es" | "en"): Promise<CmsProject[]> 
         });
         total = response.total;
         if (response.items.length === 0 && projects.length < total) {
-            throw new ContentfulDataError("No se pudieron recuperar todos los proyectos.");
+            throw new ContentfulDataError("No se pudieron recuperar todos los proyectos.", "Could not retrieve all projects.");
         }
         projects.push(...response.items.map(parseProject));
     } while (projects.length < total);

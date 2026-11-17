@@ -4,6 +4,7 @@ import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
 import type { DisplayProject } from "../types/CmsProject";
 import { ContentBlock } from "../types/ContentBlock";
 import { readImage } from "../contentful/projects";
+import { useTranslation } from "../i18n/translations";
 
 interface ProjectDetailProps {
     project: DisplayProject;
@@ -13,6 +14,7 @@ interface ProjectDetailProps {
 }
 
 const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailProps) => {
+    const text = useTranslation();
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
     const [emblaRef] = useEmblaCarousel({
@@ -117,7 +119,7 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                         onClick={onClose}
                         className="hover:text-black transition-colors pr-35 cursor-pointer"
                     >
-                        ( proyectos )
+                        ( {text.projects.toLowerCase()} )
                     </button>
 
                     <button
@@ -127,7 +129,7 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                         }}
                         className="hover:text-black transition-colors cursor-pointer"
                     >
-                        ( atras )
+                        ( {text.previous} )
                     </button>
 
                     <button
@@ -137,7 +139,7 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                         }}
                         className="hover:text-black transition-colors cursor-pointer"
                     >
-                        ( siguiente )
+                        ( {text.next} )
                     </button>
                 </div>
             </div>

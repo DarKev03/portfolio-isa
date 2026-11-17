@@ -103,7 +103,11 @@ test('admite contenido válido, conserva el año y extrae imágenes', () => {
 test('rechaza campos obligatorios incompletos', () => {
   const invalid = entry();
   invalid.fields.titulo = '';
-  assert.throws(() => parseProject(invalid), /campos incompletos o inválidos: fields\.titulo/);
+  assert.throws(() => parseProject(invalid), error => {
+    assert.match(error.message, /campos incompletos o inválidos: fields\.titulo/);
+    assert.match(error.forLanguage('en'), /missing or invalid fields: fields\.titulo/);
+    return true;
+  });
 });
 
 test('admite categorías y fecha opcionales sin ocultar valores inválidos', () => {
