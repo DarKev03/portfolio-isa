@@ -7,12 +7,14 @@ import gif from "../assets/videos/video_projects.mp4";
 import ProjectModal from "../components/ProjectModal";
 import ProjectPreview from "../components/ProjectPreview";
 import gsap from 'gsap';
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 let hasHoveredInSession = false;
 
 const ProjectsPage = () => {
     const backgroundRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
 
     const projectList: Project[] = projectsData as Project[];
     const castoroFamily = { fontFamily: "'Castoro', serif" };
@@ -20,7 +22,7 @@ const ProjectsPage = () => {
     const [hoveredProjectId, setHoveredProjectId] = useState<number | null>(null);
     const [alreadyHovered, setAlreadyHovered] = useState<boolean>(hasHoveredInSession);
 
-    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const selectedProject = projectList.find(project => String(project.id) === id);
 
     const navBarRef = useRef<HTMLDivElement>(null);
 
@@ -45,7 +47,7 @@ const ProjectsPage = () => {
                 ? projectList.length - 1
                 : currentIndex - 1;
 
-        setSelectedProject(projectList[previousIndex]);
+        navigate(`/projects/${projectList[previousIndex].id}`);
     }
 
     function setNextProject() {
@@ -60,7 +62,7 @@ const ProjectsPage = () => {
                 ? 0
                 : currentIndex + 1
 
-        setSelectedProject(projectList[nextIndex]);
+        navigate(`/projects/${projectList[nextIndex].id}`);
     }
 
     useEffect(() => {
@@ -103,7 +105,7 @@ const ProjectsPage = () => {
                     <div
                         key={project.id}
                         className="group relative flex flex-row items-center gap-25 pl-11 pr-11 hover:text-gray-600 cursor-pointer transition-colors duration-500 ease-in-out w-full"
-                        onClick={() => setSelectedProject(project)}
+                        onClick={() => navigate(`/projects/${project.id}`)}
                         onMouseEnter={() => handleMouseEnter(project.id)}
                         onMouseLeave={() => setHoveredProjectId(null)}
                     >
@@ -162,10 +164,17 @@ const ProjectsPage = () => {
                 ))}
             </div>
 
+            {id && !selectedProject && (
+                <div role="status" className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[rgba(255,254,253,1)]">
+                    <p>Proyecto no encontrado</p>
+                    <Link to="/projects" className="mt-4 underline">Volver a proyectos</Link>
+                </div>
+            )}
+
             {selectedProject && (
                 <ProjectModal
                     project={selectedProject}
-                    onClose={() => setSelectedProject(null)}
+                    onClose={() => navigate("/projects")}
                     onPrevious={setPreviousProject}
                     onNext={setNextProject}
                 />
