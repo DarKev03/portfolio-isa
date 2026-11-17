@@ -296,7 +296,7 @@ const AboutMe = () => {
 
                 <div
                     ref={imageContainerRef}
-                    className="fixed top-0 right-0 z-50 pr-8"
+                    className="pointer-events-none fixed top-0 right-0 z-50 pr-8"
                 >
 
                     <img
@@ -310,7 +310,7 @@ const AboutMe = () => {
 
                 {/* SEGUNDA IMAGEN */}
 
-                <div className="pr-10 absolute bottom-0 right-0 z-50 pb-8">
+                <div className="pointer-events-none pr-10 absolute bottom-0 right-0 z-50 pb-8">
 
                     <img
                         ref={img2Ref}

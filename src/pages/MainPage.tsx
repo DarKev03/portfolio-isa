@@ -4,7 +4,6 @@ import gsap from "gsap";
 import InfiniteCanvas from "../components/InfiniteCanvas";
 import Title from "../components/Title";
 import NavBar from "../components/NavBar";
-import ContactModal from "../components/ContactModal";
 
 const MainPage = () => {
     const titleRef = useRef<HTMLDivElement>(null);
@@ -17,7 +16,6 @@ const MainPage = () => {
     const [hasIntroFinished, setHasIntroFinished] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
     const [contactOpen, setContactOpen] = useState(false);
-    const contactRef = useRef<HTMLDivElement>(null);
     const secondTitleVisible = hasIntroFinished && hasInteracted;
 
     useEffect(() => {
@@ -94,23 +92,14 @@ const MainPage = () => {
     }, [secondTitleVisible]);
 
     useEffect(() => {
-        const contactEl = contactRef.current;
         const titleEl = titleRef2.current;
 
-        if (!contactEl || !titleEl) return;
+        if (!titleEl) return;
 
         const tl = gsap.timeline();
 
         if (contactOpen) {
             tl.to(
-                contactEl,
-                {
-                    opacity: 1,
-                    duration: 0.5,
-                    ease: "power2.out",
-                },
-                0
-            ).to(
                 titleEl,
                 {
                     opacity: 0,
@@ -121,14 +110,6 @@ const MainPage = () => {
             );
         } else if (!contactOpen && secondTitleVisible) {
             tl.to(
-                contactEl,
-                {
-                    opacity: 0,
-                    duration: 0.5,
-                    ease: "power2.in",
-                },
-                0
-            ).to(
                 titleEl,
                 {
                     opacity: 1,
@@ -178,11 +159,7 @@ const MainPage = () => {
                     gsap.set(navBarRef.current, { opacity: 1 });
                 }}
             >
-                <NavBar onContactClick={() => setContactOpen(!contactOpen)} />
-            </div>
-
-            <div ref={contactRef} className="opacity-0">
-                <ContactModal onClose={() => setContactOpen(false)} />
+                <NavBar onContactOpenChange={setContactOpen} />
             </div>
         </div>
 
