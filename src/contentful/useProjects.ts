@@ -1,24 +1,16 @@
 import { useEffect, useState } from "react";
-import localProjects from "../assets/projects.json";
-import type { Project } from "../types/Project";
-import type { DisplayProject } from "../types/CmsProject";
+import type { CmsProject } from "../types/CmsProject";
 import { ContentfulDataError, fetchProjects } from "./projects";
 
 type ProjectsState =
     | { status: "loading"; projects: [] }
     | { status: "error"; projects: []; message: string }
-    | { status: "ready"; projects: DisplayProject[] };
+    | { status: "ready"; projects: CmsProject[] };
 
 export function useProjects(): ProjectsState {
-    const [state, setState] = useState<ProjectsState>(() =>
-        __CONTENTFUL_CONFIG__
-            ? { status: "loading", projects: [] }
-            : { status: "ready", projects: localProjects as Project[] }
-    );
+    const [state, setState] = useState<ProjectsState>({ status: "loading", projects: [] });
 
     useEffect(() => {
-        if (!__CONTENTFUL_CONFIG__) return;
-
         let isActive = true;
         fetchProjects("es").then(
             projects => {

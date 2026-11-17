@@ -134,7 +134,7 @@ export function parseProject(value: unknown): CmsProject {
 
 export async function fetchProjects(locale: "es" | "en"): Promise<CmsProject[]> {
     const config = __CONTENTFUL_CONFIG__;
-    if (!config?.space || !config.accessToken || !["us", "eu"].includes(config.region)) {
+    if (!config.space || !config.accessToken || !["us", "eu"].includes(config.region)) {
         throw new ContentfulDataError("La configuración pública de Contentful está incompleta o es inválida.");
     }
     const client = createClient({

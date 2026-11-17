@@ -1,10 +1,35 @@
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createServer } from 'vite';
+import { createServer, resolveConfig } from 'vite';
 
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 after(() => server.close());
 const { parseProject, getContentImages } = await server.ssrLoadModule('/src/contentful/projects.ts');
+
+test('configura Contentful aunque el antiguo interruptor esté desactivado', async () => {
+  const keys = ['CONTENTFUL_ENABLED', 'CONTENTFUL_SPACE_ID', 'CONTENTFUL_PUBLIC_TOKEN', 'CONTENTFUL_PREVIEW_TOKEN', 'CONTENTFUL_REGION'];
+  const previous = Object.fromEntries(keys.map(key => [key, process.env[key]]));
+  Object.assign(process.env, {
+    CONTENTFUL_ENABLED: 'false',
+    CONTENTFUL_SPACE_ID: 'test-space',
+    CONTENTFUL_PUBLIC_TOKEN: 'test-public',
+    CONTENTFUL_PREVIEW_TOKEN: 'test-preview',
+    CONTENTFUL_REGION: 'eu',
+  });
+  try {
+    const config = await resolveConfig({}, 'serve');
+    assert.deepEqual(JSON.parse(config.define.__CONTENTFUL_CONFIG__), {
+      space: 'test-space',
+      accessToken: 'test-public',
+      region: 'eu',
+    });
+  } finally {
+    for (const key of keys) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  }
+});
 
 function entry() {
   const asset = {

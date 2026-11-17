@@ -14,9 +14,7 @@ const InfiniteCanvas = () => {
   const projectsState = useProjects();
   const imagePool = projectsState.projects.flatMap(project => [
     project.image,
-    ...("richContent" in project
-      ? getContentImages(project.richContent, project.title)
-      : (project.content ?? []).flatMap(block => block.image ? [block.image] : [])),
+    ...getContentImages(project.richContent, project.title),
   ]);
   const viewRef = useRef<HTMLDivElement>(null);
   const inertiaFrameRef = useRef<number | null>(null);
