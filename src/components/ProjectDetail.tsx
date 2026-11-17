@@ -1,4 +1,5 @@
 import useEmblaCarousel from "embla-carousel-react";
+import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { BLOCKS } from "@contentful/rich-text-types";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import type { DisplayProject } from "../types/CmsProject";
@@ -6,6 +7,7 @@ import { ContentBlock } from "../types/ContentBlock";
 import { readImage, splitProjectContent } from "../contentful/projects";
 import { useTranslation } from "../i18n/translations";
 import { useLanguage } from "../i18n/languageContext";
+import type { KeyboardEvent } from "react";
 
 interface ProjectDetailProps {
     project: DisplayProject;
@@ -19,11 +21,34 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
     const { language } = useLanguage();
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
-    const [emblaRef] = useEmblaCarousel({
+    const [emblaRef, emblaApi] = useEmblaCarousel({
         dragFree: true,
         containScroll: "trimSnaps",
         align: "start"
-    });
+    }, [WheelGesturesPlugin()]);
+
+    const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (!emblaApi || event.defaultPrevented || event.nativeEvent.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])")) return;
+
+        if (event.key === "ArrowRight") {
+            if (emblaApi.canScrollNext()) {
+                event.preventDefault();
+                emblaApi.scrollNext();
+            } else if (emblaApi.scrollProgress() < 1) {
+                event.preventDefault();
+                emblaApi.scrollTo(emblaApi.scrollSnapList().length - 1);
+            }
+        } else if (event.key === "ArrowLeft") {
+            if (emblaApi.canScrollPrev()) {
+                event.preventDefault();
+                emblaApi.scrollPrev();
+            } else if (emblaApi.scrollProgress() > 0) {
+                event.preventDefault();
+                emblaApi.scrollTo(0);
+            }
+        }
+    };
 
     const renderBlock = (
         block: ContentBlock,
@@ -114,6 +139,10 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
     return (
         <div
             className="relative bg-transparent w-full h-full flex flex-col overflow-hidden"
+            onKeyDown={handleKeyDown}
+            onWheelCapture={(event) => {
+                if (event.ctrlKey) event.stopPropagation();
+            }}
         >
             <div className="flex-none flex items-start pt-9 pl-11 pr-11 h-24 z-10">
                 <div className="ml-auto flex flex-row gap-5 text-base font-normal italic text-[rgba(65, 65, 65, 1)]">
