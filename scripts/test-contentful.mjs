@@ -4,9 +4,10 @@ import { createServer, resolveConfig } from 'vite';
 
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 after(() => server.close());
-const { parseProject, parseLocalizedProject, getContentImages, splitProjectContent } = await server.ssrLoadModule('/src/contentful/projects.ts');
+const { parseProject, parseLocalizedProject, readImage, splitProjectContent } = await server.ssrLoadModule('/src/contentful/projects.ts');
 const { parseCv } = await server.ssrLoadModule('/src/contentful/cv.ts');
 const { parseAbout } = await server.ssrLoadModule('/src/contentful/about.ts');
+const { parseGallery } = await server.ssrLoadModule('/src/contentful/gallery.ts');
 
 test('configura Contentful aunque el antiguo interruptor esté desactivado', async () => {
   const keys = ['CONTENTFUL_ENABLED', 'CONTENTFUL_SPACE_ID', 'CONTENTFUL_PUBLIC_TOKEN', 'CONTENTFUL_PREVIEW_TOKEN', 'CONTENTFUL_REGION'];
@@ -119,6 +120,46 @@ test('admite hasta dos fotos y rechaza traducciones ausentes o fotos no válidas
   assert.throws(() => parseAbout(invalid, 'es'), /origen no permitido/);
 });
 
+function galleryEntry() {
+  const asset = (name, contentType, host) => ({
+    fields: {
+      file: { es: { url: `//${host}/space/${name}`, contentType } },
+    },
+  });
+  return {
+    fields: {
+      fotosGalera: { es: [
+        asset('imagen.jpg', 'image/jpeg', 'images.ctfassets.net'),
+        asset('video.mp4', 'video/mp4', 'videos.ctfassets.net'),
+      ] },
+    },
+  };
+}
+
+test('carga en orden las imágenes y vídeos compartidos de la galería', () => {
+  assert.deepEqual(parseGallery(galleryEntry()), [
+    { type: 'image', url: 'https://images.ctfassets.net/space/imagen.jpg' },
+    { type: 'video', url: 'https://videos.ctfassets.net/space/video.mp4' },
+  ]);
+});
+
+test('rechaza galerías vacías, archivos sin resolver, tipos y orígenes no permitidos', () => {
+  const entry = galleryEntry();
+  entry.fields.fotosGalera.es = [];
+  assert.throws(() => parseGallery(entry), /al menos una imagen o vídeo/);
+  entry.fields.fotosGalera.es = [{ sys: { id: 'sin-resolver' } }];
+  assert.throws(() => parseGallery(entry), /inválido o sin publicar/);
+  const invalid = galleryEntry();
+  invalid.fields.fotosGalera.es[0].fields.file.es.contentType = 'application/pdf';
+  assert.throws(() => parseGallery(invalid), /inválido o sin publicar/);
+  invalid.fields.fotosGalera.es[0].fields.file.es.contentType = 'image/jpeg';
+  invalid.fields.fotosGalera.es[0].fields.file.es.url = 'https://example.com/image.jpg';
+  assert.throws(() => parseGallery(invalid), /origen no permitido/);
+  const video = galleryEntry();
+  video.fields.fotosGalera.es[1].fields.file.es.url = 'https://example.com/video.mp4';
+  assert.throws(() => parseGallery(video), /origen no permitido/);
+});
+
 function entry() {
   const asset = {
     fields: {
@@ -145,11 +186,11 @@ function entry() {
   };
 }
 
-test('admite contenido válido, conserva el año y extrae imágenes', () => {
+test('admite contenido válido, conserva el año y las imágenes insertadas', () => {
   const project = parseProject(entry());
   assert.equal(project.id, 'project-id');
   assert.equal(project.year, 2024);
-  assert.deepEqual(getContentImages(project.richContent, project.title), [project.image]);
+  assert.equal(readImage(project.richContent.content[1].data.target, project.title).url, project.image);
 });
 
 test('agrupa texto e imágenes en orden y separa secciones solo con líneas horizontales', () => {
@@ -201,11 +242,11 @@ test('elige campos localizados y conserva archivos compartidos en imágenes inse
   assert.deepEqual(english.tags, ['Design']);
   assert.equal(english.imageAlt, 'Image');
   assert.equal(english.image, 'https://images.ctfassets.net/space/es.jpg');
-  assert.deepEqual(getContentImages(english.richContent, english.title, 'en'), [english.image]);
+  assert.equal(readImage(english.richContent.content[1].data.target, english.title, 'en').url, english.image);
 
   project.fields.portada.es.fields.file.en = { url: '//images.ctfassets.net/space/en.jpg' };
   assert.equal(parseLocalizedProject(project, 'en').image, 'https://images.ctfassets.net/space/en.jpg');
-  assert.deepEqual(getContentImages(english.richContent, english.title, 'en'), ['https://images.ctfassets.net/space/en.jpg']);
+  assert.equal(readImage(english.richContent.content[1].data.target, english.title, 'en').url, 'https://images.ctfassets.net/space/en.jpg');
 });
 
 test('no sustituye texto traducible ausente ni archivos localizados inválidos', () => {

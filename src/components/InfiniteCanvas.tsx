@@ -1,8 +1,6 @@
 import { useGesture } from "@use-gesture/react";
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { getContentImages } from "../contentful/projects";
-import { useProjects } from "../contentful/useProjects";
-import { useLanguage } from "../i18n/languageContext";
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useGallery } from "../contentful/useGallery";
 import { useTranslation } from "../i18n/translations";
 
 const CELL_W = 280;
@@ -12,16 +10,48 @@ const STEP_X = CELL_W + GAP;
 const STEP_Y = CELL_H + GAP;
 const MARGIN = 3;
 const KEYBOARD_STEP = 120;
+const MEDIA_STYLE: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  display: "block",
+  userSelect: "none",
+  WebkitUserSelect: "none",
+  pointerEvents: "none",
+};
+
+const GalleryVideo = ({ url, isPlaying, onError }: { url: string; isPlaying: boolean; onError: () => void }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    let isActive = true;
+    if (isPlaying) {
+      video.play().catch(error => {
+        if (isActive && !(error instanceof DOMException && error.name === "AbortError")) onError();
+      });
+    } else {
+      video.pause();
+    }
+    return () => {
+      isActive = false;
+      video.pause();
+    };
+  }, [isPlaying, onError, url]);
+
+  return <video ref={videoRef} src={url} loop muted playsInline aria-hidden="true" tabIndex={-1} onError={onError} style={MEDIA_STYLE} />;
+};
 
 const InfiniteCanvas = () => {
-  const { language } = useLanguage();
   const text = useTranslation();
   const instructionsId = useId();
-  const projectsState = useProjects();
-  const imagePool = projectsState.projects.flatMap(project => [
-    project.image,
-    ...getContentImages(project.richContent, project.title, language),
-  ]);
+  const galleryState = useGallery();
+  const mediaPool = galleryState.status === "ready" ? galleryState.media : [];
+  const hasVideos = mediaPool.some(media => media.type === "video");
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [hasMediaError, setHasMediaError] = useState(false);
+  const handleMediaError = useCallback(() => setHasMediaError(true), []);
   const viewRef = useRef<HTMLDivElement>(null);
   const inertiaFrameRef = useRef<number | null>(null);
   const wheelFrameRef = useRef<number | null>(null);
@@ -167,44 +197,51 @@ const InfiniteCanvas = () => {
           willChange: "transform",
         }}
       >
-        {imagePool.length > 0 && cells.map(({ r, c }) => (
-          <div
-            key={`${r}-${c}`}
-            style={{
-              position: "absolute",
-              left: c * STEP_X,
-              top: r * STEP_Y,
-              width: CELL_W,
-              height: CELL_H,
-              borderRadius: 8,
-              overflow: "hidden",
-              backgroundColor: "#e0e0e0",
-            }}
-          >
-            <img
-              src={imagePool[(Math.abs(r) * 7 + Math.abs(c) * 13) % imagePool.length]}
-              alt=""
-              loading="eager"
-              decoding="async"
+        {mediaPool.length > 0 && cells.map(({ r, c }) => {
+          const media = mediaPool[(Math.abs(r) * 7 + Math.abs(c) * 13) % mediaPool.length];
+          const isVisible = c * STEP_X + offset.x < viewW && c * STEP_X + offset.x + CELL_W > 0
+            && r * STEP_Y + offset.y < viewH && r * STEP_Y + offset.y + CELL_H > 0;
+          return (
+            <div
+              key={`${r}-${c}`}
               style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-                userSelect: "none",
-                WebkitUserSelect: "none",
-                pointerEvents: "none",
+                position: "absolute",
+                left: c * STEP_X,
+                top: r * STEP_Y,
+                width: CELL_W,
+                height: CELL_H,
+                borderRadius: 8,
+                overflow: "hidden",
+                backgroundColor: "#e0e0e0",
               }}
-            />
-          </div>
-        ))}
+            >
+              {media.type === "image" ? (
+                <img src={media.url} alt="" loading="eager" decoding="async" onError={handleMediaError} style={MEDIA_STYLE} />
+              ) : isVisible ? (
+                <GalleryVideo url={media.url} isPlaying={isPlaying} onError={handleMediaError} />
+              ) : null}
+            </div>
+          );
+        })}
       </div>
-      {projectsState.status === "error" && (
-        <p role="alert" className="relative p-8">{projectsState.message}</p>
+      {galleryState.status === "loading" && <p role="status" className="relative p-8">{text.loadingGallery}</p>}
+      {galleryState.status === "unavailable" && <p role="status" className="relative p-8">{text.unavailableGallery}</p>}
+      {galleryState.status === "error" && (
+        <p role="alert" className="relative p-8">{galleryState.message}</p>
       )}
+      {hasMediaError && <p role="alert" className="relative p-8">{text.galleryMediaError}</p>}
       <p id={instructionsId} className="sr-only group-focus-visible:not-sr-only group-focus-visible:absolute group-focus-visible:bottom-4 group-focus-visible:left-4 group-focus-visible:rounded group-focus-visible:bg-white group-focus-visible:p-2">
         {text.galleryInstructions}
       </p>
+      {hasVideos && (
+        <button
+          type="button"
+          onClick={() => setIsPlaying(current => !current)}
+          className="absolute bottom-4 right-4 rounded bg-white p-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          {isPlaying ? text.pauseGalleryVideos : text.playGalleryVideos}
+        </button>
+      )}
     </div>
   );
 };

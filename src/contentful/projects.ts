@@ -107,18 +107,6 @@ function validateNodes(node: Block | Inline, title: string, locale: Language): v
     }
 }
 
-export function getContentImages(document: Document, title: string, locale: Language = "es"): string[] {
-    const images: string[] = [];
-    function visit(node: Block | Inline) {
-        if (node.nodeType === BLOCKS.EMBEDDED_ASSET) images.push(readImage(node.data.target, title, locale).url);
-        for (const child of node.content) {
-            if ("content" in child) visit(child);
-        }
-    }
-    document.content.forEach(visit);
-    return images;
-}
-
 export function splitProjectContent(document: Document): Document[] {
     const sections: Document[] = [];
     let content: Document["content"] = [];
