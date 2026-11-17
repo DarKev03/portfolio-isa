@@ -7,12 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "contentful:check": "node scripts/check-contentful.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-virtual": "^3.14.10",
     "@use-gesture/react": "^10.3.1",
+    "contentful": "^11.12.10",
     "embla-carousel-react": "^8.6.0",
     "gsap": "^3.15.0",
     "react": "^19.2.0",
