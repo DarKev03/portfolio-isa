@@ -194,11 +194,11 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                 if (event.ctrlKey) event.stopPropagation();
             }}
         >
-            <div className="flex-none flex items-start pt-9 pl-11 pr-11 h-24 z-10">
-                <div className="ml-auto flex flex-row gap-5 text-base font-normal italic text-[rgba(65, 65, 65, 1)]">
+            <div className="flex-none flex items-start px-4 pt-9 h-24 z-10 sm:px-11">
+                <div className="ml-auto flex flex-row gap-3 text-base font-normal italic text-[rgba(65, 65, 65, 1)] sm:gap-5">
                     <button
                         onClick={onClose}
-                        className="hover:text-black transition-colors pr-35 cursor-pointer"
+                        className="hover:text-black transition-colors cursor-pointer sm:pr-35"
                     >
                         ( {text.projects.toLowerCase()} )
                     </button>
