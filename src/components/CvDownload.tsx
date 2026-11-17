@@ -83,7 +83,7 @@ const CvDownload = ({ language }: CvDownloadProps) => {
                 type="button"
                 onClick={download}
                 disabled={state.status !== "ready" || isDownloading}
-                className="text-lg font-normal leading-tight italic text-[#4c4c4c9e] enabled:cursor-pointer enabled:hover:text-[#414141] disabled:cursor-not-allowed"
+                className="text-lg font-normal leading-tight italic text-[#4c4c4c9e] enabled:cursor-pointer enabled:text-[#4c4c4c] enabled:hover:text-[#414141] disabled:cursor-not-allowed"
             >
                 ( {text.downloadCv} )
             </button>
