@@ -40,7 +40,7 @@ const AboutMe = () => {
     const parentesisRef = useRef<HTMLDivElement>(null);
 
     const bioRef = useRef<HTMLDivElement>(null);
-    const expeRef = useRef<HTMLDivElement>(null);
+    const cvRef = useRef<HTMLDivElement>(null);
     const footerRef = useRef<HTMLDivElement>(null);
 
 
@@ -172,9 +172,9 @@ const AboutMe = () => {
 
 
             /*
-             * Experiencia.
+             * CV.
              */
-            gsap.to(expeRef.current, {
+            gsap.to(cvRef.current, {
 
                 opacity: 1,
 
@@ -183,15 +183,15 @@ const AboutMe = () => {
                     const bioRect =
                         bioRef.current!.getBoundingClientRect();
 
-                    const expeRect =
-                        expeRef.current!.getBoundingClientRect();
+                    const cvRect =
+                        cvRef.current!.getBoundingClientRect();
 
                     const titleRect =
                         titleContentRef.current!.getBoundingClientRect();
 
                     return (
                         (titleRect.bottom - bioRect.top) +
-                        (bioRect.bottom - expeRect.top)
+                        (bioRect.bottom - cvRect.top)
                     );
                 },
 
@@ -320,13 +320,13 @@ const AboutMe = () => {
                 </div>
 
 
-                {/* EXPERIENCIA */}
+                {/* CV */}
 
                 <div
-                    ref={expeRef}
+                    ref={cvRef}
                     className="absolute bottom-0 left-0 z-50 w-140 p-8 flex flex-col gap-7 opacity-0"
                     onFocusCapture={() => {
-                        if (expeRef.current && Number(getComputedStyle(expeRef.current).opacity) < 1) {
+                        if (cvRef.current && Number(getComputedStyle(cvRef.current).opacity) < 1) {
                             window.scrollTo(0, document.documentElement.scrollHeight);
                             ScrollTrigger.update();
                         }
@@ -335,44 +335,6 @@ const AboutMe = () => {
                         fontFamily: 'Castoro, sans-serif'
                     }}
                 >
-
-                    <div lang="es">
-
-                        <h1 className="text-lg font-normal leading-tight">
-
-                            Grado en Diseño Gráfico / <br></br>
-
-                            <span className="italic">
-                                Escola Superior de Disseny de Valéncia
-                            </span>
-
-                        </h1>
-
-                        <p className="text-sm text-[#414141]">
-                            Septiembre 2022 - Junio 2026
-                        </p>
-
-                    </div>
-
-
-                    <div lang="es">
-
-                        <h1 className="text-lg font-normal leading-tight">
-
-                            Diseñadora Gráfica (Prácticas Curriculares) / <br></br>
-
-                            <span className="italic">
-                                Samaruc Estudio
-                            </span>
-
-                        </h1>
-
-                        <p className="text-sm">
-                            Febrero 2026 - Abril 2026
-                        </p>
-
-                    </div>
-
 
                     <div>
 
