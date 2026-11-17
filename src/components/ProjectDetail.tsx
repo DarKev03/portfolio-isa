@@ -153,12 +153,12 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
             >
                 <div className="flex h-full">
 
-                    <div className="flex-none w-[50vw]" />
+                    <div className="flex-none w-1/2" />
 
                     {"richContent" in project
                         ? splitProjectContent(project.richContent).map((section, index) => (
                             <div key={index} tabIndex={0} className="flex-none w-1/2 h-full overflow-y-auto px-6 py-10" style={castoroFamily}>
-                                <div className="space-y-4">
+                                <div className="space-y-4 break-words [&_table]:w-full [&_table]:table-fixed">
                                     {documentToReactComponents(
                                         section,
                                         { renderNode: {
