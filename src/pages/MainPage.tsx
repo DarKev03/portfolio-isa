@@ -132,12 +132,6 @@ const MainPage = () => {
             ref={backgroundRef}
             className="relative h-screen w-screen overflow-hidden">
             <div
-                ref={canvasRef}
-                className="absolute inset-0">
-                <InfiniteCanvas />
-            </div>
-
-            <div
                 ref={titleRef}
                 className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
             >
@@ -160,6 +154,11 @@ const MainPage = () => {
                 }}
             >
                 <NavBar onContactOpenChange={setContactOpen} />
+            </div>
+            <div
+                ref={canvasRef}
+                className="absolute inset-0">
+                <InfiniteCanvas />
             </div>
         </div>
 
