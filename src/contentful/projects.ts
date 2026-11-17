@@ -1,9 +1,7 @@
 import { BLOCKS, INLINES, type Block, type Document, type Inline } from "@contentful/rich-text-types";
-import { createClient } from "contentful";
 import { z } from "zod";
 import type { CmsProject } from "../types/CmsProject";
-
-export class ContentfulDataError extends Error {}
+import { ContentfulDataError, getContentfulClient } from "./client";
 
 const assetSchema = z.object({
     fields: z.object({
@@ -136,15 +134,7 @@ export function parseProject(value: unknown): CmsProject {
 }
 
 export async function fetchProjects(locale: "es" | "en"): Promise<CmsProject[]> {
-    const config = __CONTENTFUL_CONFIG__;
-    if (!config.space || !config.accessToken || !["us", "eu"].includes(config.region)) {
-        throw new ContentfulDataError("La configuración pública de Contentful está incompleta o es inválida.");
-    }
-    const client = createClient({
-        space: config.space,
-        accessToken: config.accessToken,
-        host: config.region === "eu" ? "cdn.eu.contentful.com" : "cdn.contentful.com",
-    });
+    const client = getContentfulClient();
 
     const projects: CmsProject[] = [];
     let total = 0;

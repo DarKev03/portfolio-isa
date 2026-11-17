@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import gsap from 'gsap';
 
@@ -7,6 +7,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Title from '../components/Title';
 
 import NavBar from '../components/NavBar';
+import CvDownload from '../components/CvDownload';
+import type { Language } from '../types/Language';
 import { Link } from 'react-router-dom';
 
 
@@ -15,6 +17,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const AboutMe = () => {
 
+    const [language, setLanguage] = useState<Language>('es');
     const sectionRef = useRef<HTMLDivElement>(null);
 
     const imgRef = useRef<HTMLImageElement>(null);
@@ -287,7 +290,7 @@ const AboutMe = () => {
                     className="fixed top-0 right-0 z-50 p-8"
                 >
 
-                    <NavBar />
+                    <NavBar onLanguageChange={setLanguage} />
 
                 </div>
 
@@ -359,6 +362,12 @@ const AboutMe = () => {
                 <div
                     ref={expeRef}
                     className="absolute bottom-0 left-0 z-50 w-140 p-8 flex flex-col gap-7 opacity-0"
+                    onFocusCapture={() => {
+                        if (expeRef.current && Number(getComputedStyle(expeRef.current).opacity) < 1) {
+                            window.scrollTo(0, document.documentElement.scrollHeight);
+                            ScrollTrigger.update();
+                        }
+                    }}
                     style={{
                         fontFamily: 'Castoro, sans-serif'
                     }}
@@ -404,9 +413,7 @@ const AboutMe = () => {
 
                     <div>
 
-                        <p className="text-lg font-normal leading-tight cursor-pointer italic text-[#4c4c4c9e]">
-                            (download CV)
-                        </p>
+                        <CvDownload key={language} language={language} />
 
                     </div>
 

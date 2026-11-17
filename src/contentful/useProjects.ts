@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CmsProject } from "../types/CmsProject";
-import { ContentfulDataError, fetchProjects } from "./projects";
+import { ContentfulDataError } from "./client";
+import { fetchProjects } from "./projects";
 
 type ProjectsState =
     | { status: "loading"; projects: [] }

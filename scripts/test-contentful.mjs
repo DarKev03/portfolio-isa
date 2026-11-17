@@ -5,6 +5,7 @@ import { createServer, resolveConfig } from 'vite';
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 after(() => server.close());
 const { parseProject, getContentImages } = await server.ssrLoadModule('/src/contentful/projects.ts');
+const { parseCv } = await server.ssrLoadModule('/src/contentful/cv.ts');
 
 test('configura Contentful aunque el antiguo interruptor esté desactivado', async () => {
   const keys = ['CONTENTFUL_ENABLED', 'CONTENTFUL_SPACE_ID', 'CONTENTFUL_PUBLIC_TOKEN', 'CONTENTFUL_PREVIEW_TOKEN', 'CONTENTFUL_REGION'];
@@ -29,6 +30,41 @@ test('configura Contentful aunque el antiguo interruptor esté desactivado', asy
       else process.env[key] = previous[key];
     }
   }
+});
+
+function cvEntry() {
+  const asset = name => ({
+    fields: {
+      file: { es: { url: `//assets.ctfassets.net/space/${name}.pdf`, contentType: 'application/pdf' } },
+    },
+  });
+  return { fields: { cv: { es: asset('espanol'), en: asset('ingles') } } };
+}
+
+test('elige el CV vinculado al idioma sin sustituir una traducción ausente', () => {
+  const cv = cvEntry();
+  assert.equal(parseCv(cv, 'es'), 'https://assets.ctfassets.net/space/espanol.pdf');
+  assert.equal(parseCv(cv, 'en'), 'https://assets.ctfassets.net/space/ingles.pdf');
+  delete cv.fields.cv.en;
+  assert.throws(() => parseCv(cv, 'en'), /PDF válido para este idioma/);
+});
+
+test('rechaza archivos no PDF, sin resolver o con origen no permitido', () => {
+  const cv = cvEntry();
+  cv.fields.cv.es.fields.file.es.contentType = 'image/png';
+  assert.throws(() => parseCv(cv, 'es'), /PDF válido/);
+  cv.fields.cv.es = { sys: { id: 'sin-resolver' } };
+  assert.throws(() => parseCv(cv, 'es'), /PDF válido/);
+  cv.fields.cv.es = { fields: { file: { es: { url: 'https://example.com/cv.pdf', contentType: 'application/pdf' } } } };
+  assert.throws(() => parseCv(cv, 'es'), /origen no permitido/);
+});
+
+test('valida solo el archivo seleccionado de un recurso localizado', () => {
+  const cv = cvEntry();
+  cv.fields.cv.es.fields.file.en = { url: '//assets.ctfassets.net/space/otro.png', contentType: 'image/png' };
+  assert.equal(parseCv(cv, 'es'), 'https://assets.ctfassets.net/space/espanol.pdf');
+  cv.fields.cv.en = cv.fields.cv.es;
+  assert.throws(() => parseCv(cv, 'en'), /PDF válido/);
 });
 
 function entry() {
