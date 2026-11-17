@@ -3,7 +3,7 @@ import { BLOCKS } from "@contentful/rich-text-types";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import type { DisplayProject } from "../types/CmsProject";
 import { ContentBlock } from "../types/ContentBlock";
-import { readImage } from "../contentful/projects";
+import { readImage, splitProjectContent } from "../contentful/projects";
 import { useTranslation } from "../i18n/translations";
 import { useLanguage } from "../i18n/languageContext";
 
@@ -156,17 +156,19 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                     <div className="flex-none w-[50vw]" />
 
                     {"richContent" in project
-                        ? project.richContent.content.map((block, index) => (
-                            <div key={index} className="flex-none w-1/2 h-full overflow-y-auto px-6 py-10" style={castoroFamily}>
-                                {documentToReactComponents(
-                                    { nodeType: BLOCKS.DOCUMENT, data: {}, content: [block] },
-                                    { renderNode: {
-                                        [BLOCKS.EMBEDDED_ASSET]: node => {
-                                            const image = readImage(node.data.target, project.title, language);
-                                            return <img src={image.url} alt={image.alt} className="w-full h-full object-contain" />;
-                                        },
-                                    } },
-                                )}
+                        ? splitProjectContent(project.richContent).map((section, index) => (
+                            <div key={index} tabIndex={0} className="flex-none w-1/2 h-full overflow-y-auto px-6 py-10" style={castoroFamily}>
+                                <div className="space-y-4">
+                                    {documentToReactComponents(
+                                        section,
+                                        { renderNode: {
+                                            [BLOCKS.EMBEDDED_ASSET]: node => {
+                                                const image = readImage(node.data.target, project.title, language);
+                                                return <img src={image.url} alt={image.alt} className="w-full h-auto object-contain" />;
+                                            },
+                                        } },
+                                    )}
+                                </div>
                             </div>
                         ))
                         : project.content?.map((block, index) =>

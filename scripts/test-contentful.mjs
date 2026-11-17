@@ -4,7 +4,7 @@ import { createServer, resolveConfig } from 'vite';
 
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 after(() => server.close());
-const { parseProject, parseLocalizedProject, getContentImages } = await server.ssrLoadModule('/src/contentful/projects.ts');
+const { parseProject, parseLocalizedProject, getContentImages, splitProjectContent } = await server.ssrLoadModule('/src/contentful/projects.ts');
 const { parseCv } = await server.ssrLoadModule('/src/contentful/cv.ts');
 const { parseAbout } = await server.ssrLoadModule('/src/contentful/about.ts');
 
@@ -150,6 +150,19 @@ test('admite contenido válido, conserva el año y extrae imágenes', () => {
   assert.equal(project.id, 'project-id');
   assert.equal(project.year, 2024);
   assert.deepEqual(getContentImages(project.richContent, project.title), [project.image]);
+});
+
+test('agrupa texto e imágenes en orden y separa secciones solo con líneas horizontales', () => {
+  const document = entry().fields.textoProyecto;
+  const [text, image] = document.content;
+  const separator = { nodeType: 'hr', data: {}, content: [] };
+  document.content = [separator, text, image, text, separator, separator, image, text, separator];
+
+  const sections = splitProjectContent(document);
+  assert.deepEqual(sections.map(section => section.content), [[text, image, text], [image, text]]);
+  assert.deepEqual(document.content, [separator, text, image, text, separator, separator, image, text, separator]);
+  assert.deepEqual(splitProjectContent({ ...document, content: [text, image] }).map(section => section.content), [[text, image]]);
+  assert.deepEqual(splitProjectContent({ ...document, content: [separator] }), []);
 });
 
 function localizedEntry() {

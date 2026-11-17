@@ -119,6 +119,23 @@ export function getContentImages(document: Document, title: string, locale: Lang
     return images;
 }
 
+export function splitProjectContent(document: Document): Document[] {
+    const sections: Document[] = [];
+    let content: Document["content"] = [];
+
+    for (const block of document.content) {
+        if (block.nodeType === BLOCKS.HR) {
+            if (content.length > 0) sections.push({ ...document, content });
+            content = [];
+        } else {
+            content.push(block);
+        }
+    }
+
+    if (content.length > 0) sections.push({ ...document, content });
+    return sections;
+}
+
 const entrySchema = z.object({
     sys: z.object({ id: z.string().min(1) }),
     fields: z.object({
