@@ -17,7 +17,7 @@
 - Contacto: `NavBar` abre `ContactModal` sobre la página actual; el diálogo se cierra con botón, Escape o clic fuera. En MainPage, `onContactOpenChange` sincroniza la animación del título.
 - Galería de inicio: usa exclusivamente la entrada publicada `galeriaInicio` y su campo compartido `fotosGalera` (imágenes o vídeos); es una región enfocada después del menú y las flechas desplazan el lienzo en cuatro direcciones.
 - Idioma: `LanguageProvider` comparte la selección entre rutas, la guarda en el navegador y utiliza español por defecto; no modifica las URL.
-- Movimiento reducido: se respeta la preferencia del sistema; se omiten las transiciones y el desplazamiento animado, la galería comienza con los vídeos pausados y Sobre mí usa una composición estática desplazable.
+- Movimiento reducido: la portada y los proyectos respetan la preferencia del sistema; la galería comienza con los vídeos pausados. Por decisión de diseño, Sobre mí mantiene sus animaciones de scroll incluso con movimiento reducido.
 - Proyectos de Contentful: se solicitan todos los locales y se seleccionan los textos del idioma activo; los campos compartidos y archivos multimedia pueden usar `es`, sin sustituir traducciones de texto ausentes.
 - Contentful: `assets.ts` valida URLs e imágenes compartidas; `richText.ts` valida documentos enriquecidos independientemente del tipo de entrada.
 - Listado de proyectos: muestra hasta las dos primeras categorías del idioma activo debajo del título, separadas por `/`; son opcionales.

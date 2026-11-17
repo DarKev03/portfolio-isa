@@ -8,20 +8,18 @@ import Title from '../components/Title';
 import { useLanguage } from '../i18n/languageContext';
 import { useAbout } from '../contentful/useAbout';
 import { useTranslation } from '../i18n/translations';
-import { useReducedMotion } from '../components/useReducedMotion';
 import RichTextContent from '../components/RichTextContent';
 gsap.registerPlugin(ScrollTrigger);
 
 const AboutMe = () => {
     const { language } = useLanguage();
     const text = useTranslation();
-    const reducedMotion = useReducedMotion();
     const aboutState = useAbout();
     const aboutContent = aboutState.status === 'ready' ? aboutState.content : null;
     const [firstPhoto, secondPhoto] = aboutContent?.photos ?? [];
     const [needsFlowLayout, setNeedsFlowLayout] = useState(false);
     const [hasPhotoError, setHasPhotoError] = useState(false);
-    const usesFlowLayout = reducedMotion || needsFlowLayout;
+    const usesFlowLayout = needsFlowLayout;
     const longContentWidth = firstPhoto ? 'max-w-[calc(100%-min(168px,30vw)-32px)]' : 'max-w-full';
     const sectionRef = useRef<HTMLDivElement>(null);
     const img2Ref = useRef<HTMLImageElement>(null);
@@ -80,16 +78,6 @@ const AboutMe = () => {
             const parentesis = parentesisRef.current;
 
             if (!navBar || !imageContainer || !title || !titleContent || !bio || !cv || !footer || !parentesis) return;
-
-            if (reducedMotion) {
-                const positionPhoto = () => gsap.set(imageContainer, {
-                    opacity: 1,
-                    y: navBar.getBoundingClientRect().bottom + 20,
-                });
-                positionPhoto();
-                window.addEventListener('resize', positionPhoto);
-                return () => window.removeEventListener('resize', positionPhoto);
-            }
 
             gsap.set(imageContainer, { opacity: 1 });
 
@@ -151,7 +139,7 @@ const AboutMe = () => {
 
         ScrollTrigger.refresh();
         return () => ctx.revert();
-    }, [aboutContent, aboutState.status, usesFlowLayout, reducedMotion]);
+    }, [aboutContent, aboutState.status, usesFlowLayout]);
 
     useEffect(() => {
         const root = document.documentElement;
@@ -160,10 +148,10 @@ const AboutMe = () => {
     }, []);
 
     return (
-        <div className={`${reducedMotion ? 'min-h-screen' : usesFlowLayout ? 'min-h-[150vh]' : 'h-[150vh]'} bg-[#fffefd] no-scrollbar`}>
+        <div className={`${usesFlowLayout ? 'min-h-[150vh]' : 'h-[150vh]'} bg-[#fffefd] no-scrollbar`}>
             <div
                 ref={sectionRef}
-                className={`${usesFlowLayout ? `relative flex ${reducedMotion ? 'min-h-screen' : 'min-h-[150vh]'} w-full flex-col` : 'sticky top-0 h-screen w-screen overflow-hidden'} text-[#414141]`}
+                className={`${usesFlowLayout ? 'relative flex min-h-[150vh] w-full flex-col' : 'sticky top-0 h-screen w-screen overflow-hidden'} text-[#414141]`}
             >
                 <div ref={titleRef} className="about-header fixed inset-0 z-50 pointer-events-none p-8">
                     <div ref={titleContentRef}>
