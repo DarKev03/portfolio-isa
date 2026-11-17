@@ -1,6 +1,5 @@
 import Title from "../components/Title";
-import projectsData from "../assets/projects.json";
-import { Project } from "../types/Project";
+import { useProjects } from "../contentful/useProjects";
 import { useRef, useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import gif from "../assets/videos/video_projects.mp4";
@@ -16,17 +15,18 @@ const ProjectsPage = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
-    const projectList: Project[] = projectsData as Project[];
+    const projectsState = useProjects();
+    const projectList = projectsState.projects;
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
-    const [hoveredProjectId, setHoveredProjectId] = useState<number | null>(null);
+    const [hoveredProjectId, setHoveredProjectId] = useState<string | number | null>(null);
     const [alreadyHovered, setAlreadyHovered] = useState<boolean>(hasHoveredInSession);
 
     const selectedProject = projectList.find(project => String(project.id) === id);
 
     const navBarRef = useRef<HTMLDivElement>(null);
 
-    const handleMouseEnter = (projectId: number) => {
+    const handleMouseEnter = (projectId: string | number) => {
         setHoveredProjectId(projectId);
 
         if (!alreadyHovered) {
@@ -143,7 +143,7 @@ const ProjectsPage = () => {
                             {project.year}
                         </span>
 
-                        {!alreadyHovered && project.id === 1 && (
+                        {!alreadyHovered && index === 0 && (
                             <div className="pointer-events-none absolute bottom-0 left-250 hidden aspect-square w-90 lg:block">
                                 <video
                                     src={gif}
@@ -164,7 +164,11 @@ const ProjectsPage = () => {
                 ))}
             </div>
 
-            {id && !selectedProject && (
+            {projectsState.status === "loading" && <p role="status" className="p-8">Cargando proyectos…</p>}
+            {projectsState.status === "error" && <p role="alert" className="p-8">{projectsState.message}</p>}
+            {projectsState.status === "ready" && projectList.length === 0 && <p role="status" className="p-8">No hay proyectos publicados.</p>}
+
+            {projectsState.status === "ready" && id && !selectedProject && (
                 <div role="status" className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[rgba(255,254,253,1)]">
                     <p>Proyecto no encontrado</p>
                     <Link to="/projects" className="mt-4 underline">Volver a proyectos</Link>

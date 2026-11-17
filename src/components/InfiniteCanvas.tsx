@@ -1,6 +1,7 @@
 import { useGesture } from "@use-gesture/react";
 import { useEffect, useRef, useState } from "react";
-import projects from "../assets/projects.json";
+import { getContentImages } from "../contentful/projects";
+import { useProjects } from "../contentful/useProjects";
 
 const CELL_W = 280;
 const CELL_H = 190;
@@ -9,17 +10,14 @@ const STEP_X = CELL_W + GAP;
 const STEP_Y = CELL_H + GAP;
 const MARGIN = 3;
 
-const imagePool: string[] = projects.flatMap((p) => [
-  p.image,
-  ...(p.content ?? []).map((c) => c.image),
-]);
-
-const pickImage = (r: number, c: number) => {
-  const idx = (Math.abs(r) * 7 + Math.abs(c) * 13) % imagePool.length;
-  return imagePool[idx];
-};
-
 const InfiniteCanvas = () => {
+  const projectsState = useProjects();
+  const imagePool = projectsState.projects.flatMap(project => [
+    project.image,
+    ...("richContent" in project
+      ? getContentImages(project.richContent, project.title)
+      : (project.content ?? []).flatMap(block => block.image ? [block.image] : [])),
+  ]);
   const viewRef = useRef<HTMLDivElement>(null);
   const inertiaFrameRef = useRef<number | null>(null);
   const wheelFrameRef = useRef<number | null>(null);
@@ -138,7 +136,7 @@ const InfiniteCanvas = () => {
           willChange: "transform",
         }}
       >
-        {cells.map(({ r, c }) => (
+        {imagePool.length > 0 && cells.map(({ r, c }) => (
           <div
             key={`${r}-${c}`}
             style={{
@@ -153,7 +151,7 @@ const InfiniteCanvas = () => {
             }}
           >
             <img
-              src={pickImage(r, c)}
+              src={imagePool[(Math.abs(r) * 7 + Math.abs(c) * 13) % imagePool.length]}
               alt=""
               loading="eager"
               decoding="async"
@@ -170,6 +168,9 @@ const InfiniteCanvas = () => {
           </div>
         ))}
       </div>
+      {projectsState.status === "error" && (
+        <p role="alert" className="relative p-8">{projectsState.message}</p>
+      )}
     </div>
   );
 };

@@ -1,9 +1,12 @@
 import useEmblaCarousel from "embla-carousel-react";
-import { Project } from "../types/Project";
+import { BLOCKS } from "@contentful/rich-text-types";
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
+import type { DisplayProject } from "../types/CmsProject";
 import { ContentBlock } from "../types/ContentBlock";
+import { readImage } from "../contentful/projects";
 
 interface ProjectDetailProps {
-    project: Project;
+    project: DisplayProject;
     onClose: () => void;
     onPrevious: () => void;
     onNext: () => void;
@@ -148,13 +151,23 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
 
                     <div className="flex-none w-[50vw]" />
 
-                    {project.content?.map((block, index) =>
-                        renderBlock(
-                            block,
-                            index,
-                            project.content?.length || 0
-                        )
-                    )}
+                    {"richContent" in project
+                        ? project.richContent.content.map((block, index) => (
+                            <div key={index} className="flex-none w-1/2 h-full overflow-y-auto px-6 py-10" style={castoroFamily}>
+                                {documentToReactComponents(
+                                    { nodeType: BLOCKS.DOCUMENT, data: {}, content: [block] },
+                                    { renderNode: {
+                                        [BLOCKS.EMBEDDED_ASSET]: node => {
+                                            const image = readImage(node.data.target, project.title);
+                                            return <img src={image.url} alt={image.alt} className="w-full h-full object-contain" />;
+                                        },
+                                    } },
+                                )}
+                            </div>
+                        ))
+                        : project.content?.map((block, index) =>
+                            renderBlock(block, index, project.content?.length || 0)
+                        )}
 
                 </div>
             </div>

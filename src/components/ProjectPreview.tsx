@@ -1,9 +1,9 @@
 import { useLayoutEffect, useRef } from "react";
-import { Project } from "../types/Project";
+import type { DisplayProject } from "../types/CmsProject";
 import gsap from "gsap";
 
 interface ProjectPreviewProps {
-    project: Project;
+    project: DisplayProject;
 }
 
 const ProjectPreview = ({ project }: ProjectPreviewProps) => {
@@ -38,7 +38,7 @@ const ProjectPreview = ({ project }: ProjectPreviewProps) => {
             <img
                 ref={imageRef}
                 src={project.image}
-                alt={project.title}
+                alt={"imageAlt" in project ? project.imageAlt : project.title}
                 className="w-full h-full object-cover"
             />
         </div>

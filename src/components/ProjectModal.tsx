@@ -1,10 +1,10 @@
-import { Project } from "../types/Project";
+import type { DisplayProject } from "../types/CmsProject";
 import ProjectDetail from "./ProjectDetail";
 import { useEffect, useRef } from "react";
 import gsap from 'gsap';
 
 interface ProjectModalProps {
-    project: Project;
+    project: DisplayProject;
     onClose: () => void;
     onPrevious: () => void;
     onNext: () => void;
