@@ -1,0 +1,58 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage{portfolio-informe}
+\renewcommand{\contentsname}{Índice}
+\renewcommand{\chaptername}{}
+\setcounter{secnumdepth}{1}
+\setcounter{tocdepth}{1}
+
+\begin{document}
+
+\entregableportada
+  {Checklist de arquitectura}
+  {Rutas, componentes, tipos y estructura}
+  {Documento técnico de seguimiento independiente\\16 de noviembre de 2026}
+
+\section*{Uso y prioridades}
+
+Cada fila tiene un identificador, prioridad y casilla. Marca la casilla al completar y verificar la tarea. No implica autorización para cambiar código.
+
+\begin{itemize}
+  \item \textbf{P0:} decisión/bloqueo antes de definir arquitectura o entrega.
+  \item \textbf{P1:} ruta, interacción o accesibilidad importante.
+  \item \textbf{P2:} mantenibilidad/consistencia que se aborda con alcance acordado.
+\end{itemize}
+
+\tableofcontents
+\clearpage
+
+\chapter{Enrutador y estados}
+
+\begin{listaacciones}  \tarea{P1}{Añadir ruta comodín \archivo{*} y página 404 con acceso a rutas válidas.}  \tarea{P1}{Definir error boundary/recuperación de render y estados de carga fallida.}  \tarea{P1}{Mantener y probar el caso de proyecto no encontrado.}  \tarea{P1}{Acordar navegación anterior/siguiente basada en el orden de datos, no en una suposición de IDs consecutivos.}  \tarea{P1}{Probar rutas profundas y recarga en el proveedor de producción.}  \tarea{P2}{Decidir si el detalle seleccionado en modal debe ser compartible mediante URL.}  \tarea{P2}{Uniformar imports con/sin extensión cuando se editen esos módulos.}
+\end{listaacciones}
+\criteriocierre{Las rutas válidas, desconocidas, directas y fallidas presentan resultados previstos.}
+
+\chapter{Responsabilidades de páginas}
+
+\begin{listaacciones}  \tarea{P1}{En \archivo{MainPage}, probar visibilidad inicial de navegación y acceso por teclado.}  \tarea{P1}{En \archivo{ProjectsPage}, reemplazar el \archivo{div} clicable por una interacción semántica y resolver overflow.}  \tarea{P1}{En \archivo{ProjectDetailPage}, acordar paridad y diferencias frente al detalle modal.}  \tarea{P2}{Evaluar separación de contenido y ScrollTrigger en \archivo{AboutMe} solo si reduce acoplamiento real.}  \tarea{P2}{Mantener las páginas como composición de ruta, evitando extraer componentes por longitud arbitraria.}
+\end{listaacciones}
+\criteriocierre{Cada página coordina una pantalla y delega unidades coherentes sin refactorización preventiva.}
+
+\chapter{Componentes e interacciones}
+
+\begin{listaacciones}  \tarea{P1}{Hacer semántico y operable \archivo{NavBar} / “Contacto” en todas las páginas donde aparezca.}  \tarea{P1}{Definir si \archivo{LanguageSelector} se conecta a i18n o se elimina hasta tener traducciones.}  \tarea{P1}{Definir cierre de \archivo{ProjectModal} y asegurar que interactuar con contenido no lo cierre accidentalmente.}  \tarea{P1}{Revisar \archivo{ContactModal}: nombre del tipo de props, \archivo{pointer-events-none} y cierre comprobable.}  \tarea{P2}{Decidir si \archivo{ProjectDetail} y \archivo{ProjectDetailPage} comparten componente de renderizado de bloques, preservando layouts distintos.}  \tarea{P2}{Mantener \archivo{InfiniteCanvas} cohesivo; extraer gesto/estado solo si facilita una necesidad real de prueba o reutilización.}  \tarea{P2}{Revisar montaje/desmontaje y cleanup de GSAP, ScrollTrigger, listeners y \archivo{requestAnimationFrame}, también bajo StrictMode.}
+\end{listaacciones}
+\criteriocierre{Los componentes interactivos son accesibles, tienen responsabilidades claras y liberan recursos al desmontar.}
+
+\chapter{Contratos y recursos}
+
+\begin{listaacciones}  \tarea{P0}{Si se introduce CMS/API, validar los datos al entrar; una aserción \archivo{as Project[]} no es validación runtime.}  \tarea{P1}{Decidir si \archivo{double-image} es un bloque requerido: renderizarlo o retirar el tipo.}  \tarea{P2}{Confirmar con búsqueda global si \archivo{Image.ts} se usa antes de eliminarlo.}  \tarea{P2}{Confirmar con búsqueda global si \archivo{@tanstack/react-virtual} y \archivo{react-infinite-canvas} se usan antes de limpiar dependencias.}  \tarea{P2}{Mantener contratos \archivo{Project} / \archivo{ContentBlock} sincronizados con JSON, CMS y consumidores.}  \tarea{P2}{Verificar origen, autorización y fallback de imágenes, fuentes y vídeos.}
+\end{listaacciones}
+\criteriocierre{Cada campo y variante admitida tiene comportamiento definido y datos externos validados en el límite.}
+
+\chapter{Pruebas estructurales}
+
+\begin{listaacciones}  \tarea{P1}{Probar las cuatro rutas declaradas y rutas directas.}  \tarea{P1}{Probar 404, ID inválido/inexistente y límites anterior/siguiente.}  \tarea{P1}{Probar lista, modal y detalle con ratón, teclado y touch.}  \tarea{P1}{Medir overflow por ruta en viewports móvil, tablet y escritorio.}  \tarea{P1}{Ejecutar lint y build y guardar evidencia.}  \tarea{P2}{Elegir infraestructura de tests antes de añadir pruebas automatizadas; mantenerlas enfocadas a rutas, bloques y flujos reales.}
+\end{listaacciones}
+\criteriocierre{Las pruebas cubren rutas y componentes interactivos con evidencia reproducible en un entorno identificado.}
+
+\end{document}

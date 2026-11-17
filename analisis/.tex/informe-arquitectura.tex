@@ -1,0 +1,186 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage{portfolio-informe}
+\renewcommand{\contentsname}{Índice}
+\renewcommand{\chaptername}{}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+
+\begin{document}
+
+\entregableportada
+  {Informe de arquitectura}
+  {Estructura, rutas y responsabilidades}
+  {Revisión de código y comprobación local\\16 de noviembre de 2026}
+
+\tableofcontents
+\clearpage
+
+\chapter{Conclusión}
+
+La estructura base es fácil de seguir para el tamaño actual: entrada React, componente raíz, definición de rutas, páginas, componentes reutilizables, tipos y recursos estáticos. No se justifica una reorganización amplia por carpetas.
+
+Los problemas estructurales concretos son más importantes que el nombre de las carpetas: no existe una ruta 404 visible, el renderizado de bloques de proyecto está duplicado, algunos elementos visuales se usan como controles sin semántica, la navegación de contacto no tiene acción en todas las páginas y los datos JSON se asumen tipados mediante una aserción. El listado también presenta un desbordamiento móvil reproducido en navegador local.
+
+Este informe no contiene checklist de tareas. Las comprobaciones y responsables se encuentran en el documento separado \textit{Checklist de arquitectura}.
+
+\chapter{Estructura observada}
+
+\begin{center}
+\begin{tikzpicture}[
+  caja/.style={informe caja,text width=30mm,minimum height=12mm},
+  smallbox/.style={informe caja secundaria,text width=30mm,minimum height=11mm}
+]
+  \node[caja] (main) at (0,0) {\archivo{main.tsx}\\Arranque React};
+  \node[caja] (app) at (4.8,0) {\archivo{App.tsx}\\Raíz};
+  \node[caja] (router) at (9.6,0) {\archivo{routes/}\\Enrutador};
+  \node[smallbox] (home) at (0,-2.0) {Portada y\\Sobre mí};
+  \node[smallbox] (projects) at (4.8,-2.0) {Listado de\\proyectos};
+  \node[smallbox] (detail) at (9.6,-2.0) {Detalle por URL};
+  \node[caja] (components) at (0,-4.0) {\archivo{components/}\\Interfaz};
+  \node[caja] (assets) at (4.8,-4.0) {\archivo{assets/}\\Datos y recursos};
+  \node[caja] (types) at (9.6,-4.0) {\archivo{types/}\\Contratos};
+  \draw[informe flecha] (main) -- (app);
+  \draw[informe flecha] (app) -- (router);
+  \draw[informe flecha] (router.south) -- (detail.north);
+  \draw[informe flecha] (router.south) |- (projects.north);
+  \draw[informe flecha] (router.south) |- (home.north);
+  \draw[informe flecha] (home) -- (components);
+  \draw[informe flecha] (projects) -- (assets);
+  \draw[informe flecha] (detail) -- (types);
+\end{tikzpicture}
+\end{center}
+
+El esquema agrupa responsabilidades: las páginas consumen componentes y datos; los tipos describen contratos para el código TypeScript y no representan un servicio independiente.
+
+\section{Arranque y rutas}
+
+\begin{enumerate}
+  \item \archivo{src/main.tsx} importa estilos y monta \archivo{App} dentro de \archivo{StrictMode}.
+  \item \archivo{src/App.tsx} delega el contenido a \archivo{AppRouter}; es una capa raíz pequeña y adecuada.
+  \item \archivo{src/routes/AppRouter.tsx} declara \archivo{BrowserRouter} y las páginas asociadas a \rutaweb{/}, \rutaweb{/aboutme}, \rutaweb{/projects} y \rutaweb{/projects/:id}.
+\end{enumerate}
+
+No hay ruta comodín. La prueba local de \rutaweb{/url-inexistente} dejó el cuerpo vacío y registró una advertencia de React Router. El detalle de un proyecto desconocido sí muestra un mensaje, pero no hay una estrategia de error general observada.
+
+\chapter{Responsabilidades actuales}
+
+\section{Páginas}
+
+\begin{longtable}{@{}>{\bfseries}p{38mm} p{52mm} p{62mm}@{}}
+\toprule
+Módulo & Responsabilidad & Consideración \\
+\midrule
+\endhead
+\archivo{MainPage} & Lienzo, título, animaciones, navegación y contacto. & Revisar estados iniciales, interacción con teclado y limpieza de timelines GSAP. \\
+\archivo{AboutMe} & Biografía, experiencia, imágenes, contacto y animaciones de scroll. & Contenido editorial y ScrollTrigger conviven en un módulo extenso; extraer solo si mejora una responsabilidad concreta. \\
+\archivo{ProjectsPage} & Lee JSON; lista, hover, vídeo, selección y modal. & Un \archivo{div} clicable representa una acción sin semántica de control. \\
+\archivo{ProjectDetailPage} & Resuelve ID y presenta detalle independiente/carrusel. & Contiene un segundo renderizador de bloques, separado del modal. \\
+\bottomrule
+\end{longtable}
+
+\section{Componentes compartidos}
+
+\begin{longtable}{@{}>{\bfseries}p{37mm} p{55mm} p{60mm}@{}}
+\toprule
+Componente & Función & Observación \\
+\midrule
+\endhead
+\archivo{Title} & Rótulo de identidad. & Presentacional y simple. \\
+\archivo{NavBar} & Navegación, selector de idioma y contacto. & Contacto es un \archivo{p} con callback opcional; sin acción en algunas instancias y no operable correctamente como control. \\
+\archivo{LanguageSelector} & Cambia el estado visual EN/ES. & No conecta el idioma con los textos ni con un sistema de internacionalización. \\
+\archivo{InfiniteCanvas} & Cuadrícula de imágenes y gestos con inercia. & Complejo, pero mantiene una responsabilidad identificable. \\
+\archivo{ProjectPreview} & Imagen de previsualización al pasar el puntero. & Unidad presentacional coherente. \\
+\archivo{ProjectModal} & Overlay y animación de entrada del detalle modal. & La propagación del clic requiere una regla de cierre inequívoca. \\
+\archivo{ProjectDetail} & Carrusel y bloques en el modal. & Duplica tipos de bloque; el contenedor cierra ante clics del contenido. \\
+\archivo{ContactModal} & Capa con datos de contacto. & La interfaz de props se llama \archivo{ProjectModalProps}; la raíz usa \archivo{pointer-events-none}. \\
+\bottomrule
+\end{longtable}
+
+\chapter{Datos y contratos}
+
+\section{Flujo de carga de archivos y recursos}
+
+\begin{center}
+\begin{tikzpicture}[
+  caja/.style={informe caja,text width=32mm,minimum height=14mm}
+]
+  \node[caja] (source) at (0,0) {Repositorio\\JSON y código};
+  \node[caja] (vite) at (4.6,0) {Vite\\desarrollo / build};
+  \node[caja] (browser) at (9.2,0) {Navegador\\aplicación React};
+  \node[caja] (remote) at (9.2,-2.0) {Recursos externos\\imágenes / fuentes};
+  \node[caja] (local) at (4.6,-2.0) {Recursos locales\\vídeo / SVG};
+  \draw[informe flecha] (source) -- (vite);
+  \draw[informe flecha] (vite) -- (browser);
+  \draw[informe flecha] (browser) -- (remote);
+  \draw[informe flecha] (browser) -- (local);
+\end{tikzpicture}
+\end{center}
+
+Vite integra los datos importados del JSON en la aplicación. El navegador solicita las imágenes remotas y la fuente de Google, además de recursos locales como el vídeo y los SVG usados en la interfaz. Que una solicitud reutilice caché depende de las cabeceras y del navegador; no se ha medido en producción. No hay un flujo de subida de archivos de la cliente.
+
+\section{Contratos actuales}
+
+\begin{itemize}
+  \item \archivo{src/assets/projects.json} contiene cinco proyectos.
+  \item \archivo{Project.ts} define datos de proyecto y \archivo{ContentBlock.ts} declara cuatro tipos de bloque.
+  \item Los renderizadores del detalle cubren \archivo{text-image}, \archivo{image-text} y \archivo{image-full}, pero no \archivo{double-image}.
+  \item La conversión \archivo{projectsData as Project[]} no valida la forma del JSON en tiempo de ejecución. Si se incorpora CMS/API, validar el contenido en el límite.
+  \item \archivo{Image.ts} no aparece referenciado en el código fuente consultado; confirmar antes de proponer su eliminación.
+  \item Las búsquedas en \archivo{src} no encontraron referencias a \archivo{@tanstack/react-virtual} ni \archivo{react-infinite-canvas}, a pesar de que aparecen en \archivo{package.json}. Confirmar uso en el proyecto completo antes de limpiar dependencias.
+\end{itemize}
+
+\chapter{Hallazgos y consecuencias}
+
+\begin{tabularx}{\textwidth}{>{\bfseries}p{25mm} X X}
+\toprule
+Área & Evidencia & Riesgo o efecto \\
+\midrule
+Enrutador & Falta ruta \archivo{*}; ruta desconocida queda vacía en prueba local. & El usuario pierde contexto y no tiene salida clara. \\
+Responsive & \rutaweb{/projects} mide 1160 px de documento en viewport de 390 px. & Desplazamiento horizontal excesivo y navegación difícil en móvil. \\
+Accesibilidad & Filas de proyecto y contacto incluyen elementos no semánticos con clic. & Uso con teclado y tecnologías de asistencia no está garantizado. \\
+Modal & Clic en el contenedor del detalle llama a cerrar; algunos clics se propagan. & El detalle puede cerrarse al interactuar con su contenido. \\
+Duplicación & Dos switches separados representan bloques de proyecto. & Cambios pueden divergir entre la ruta y el modal. \\
+Gestión de datos & Proyecto JSON estático y tipos asumidos mediante aserción. & No hay edición por la cliente ni validación de datos externos. \\
+\bottomrule
+\end{tabularx}
+
+\section{Comprobación de rutas en local}
+
+\begin{center}
+\begin{tikzpicture}[node distance=9mm and 8mm]
+  \node[informe caja] (url) {URL};
+  \node[informe caja,right=of url] (route) {Ruta válida\\resuelta};
+  \node[informe caja,right=of route] (page) {Página\\renderizada};
+  \node[informe caja,below=of route] (missing) {Ruta desconocida\\sin contenido};
+  \draw[informe flecha] (url) -- (route);
+  \draw[informe flecha] (route) -- (page);
+  \draw[informe enlace] (url.south) |- (missing.west);
+\end{tikzpicture}
+\end{center}
+
+En el servidor local se probaron las cuatro rutas declaradas y una ruta inexistente. Portada, biografía, listado y detalle se renderizaron; la ruta inexistente no presentó contenido. En la medición de 390 px, el listado fue la única ruta con desbordamiento horizontal reproducido entre las rutas comparadas. Estas pruebas no cubren todos los tamaños, interacciones, navegadores ni producción.
+
+\chapter{Recomendaciones de diseño estructural}
+
+\begin{enumerate}
+  \item Mantener la separación actual de \archivo{routes}, \archivo{pages}, \archivo{components}, \archivo{types} y \archivo{assets}; es clara para el producto actual.
+  \item Añadir una salida de ruta desconocida y decidir cómo mostrar errores de renderizado y de carga.
+  \item Hacer semánticos los controles interactivos y separar la zona de cierre del modal de su contenido.
+  \item Si ambas vistas de detalle deben compartir los mismos bloques, extraer una presentación tipada común manteniendo independientes las cabeceras y los layouts. No unificar lo que deba comportarse distinto.
+  \item Mantener páginas como composición de pantalla y extraer secciones solo para reducir una responsabilidad real o habilitar pruebas/reutilización.
+  \item Revisar los efectos GSAP y la limpieza de recursos de animación, especialmente en \archivo{MainPage}.
+  \item Si se adopta CMS, validar datos externos y añadir solamente las capas de integración que requiera el flujo aprobado.
+\end{enumerate}
+
+\chapter{Referencias}
+
+\begin{itemize}
+  \item Entrada: \archivo{src/main.tsx}, \archivo{src/App.tsx}
+  \item Rutas: \archivo{src/routes/AppRouter.tsx}
+  \item Páginas: \archivo{src/pages/}
+  \item Componentes: \archivo{src/components/}
+  \item Datos/tipos: \archivo{src/assets/projects.json}, \archivo{src/types/}
+  \item Checklist independiente: \archivo{checklist-arquitectura.tex}
+\end{itemize}
+
+\end{document}

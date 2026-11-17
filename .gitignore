@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+
+# Archivos auxiliares de compilación de los informes LaTeX
+/analisis/.tex/*.aux
+/analisis/.tex/*.out
+/analisis/.tex/*.toc
+/analisis/.tex/*.fls
+/analisis/.tex/*.pdf
+/analisis/.tex/*.fdb_latexmk
+/analisis/.tex/*.synctex.gz
