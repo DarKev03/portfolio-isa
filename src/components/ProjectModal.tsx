@@ -18,9 +18,14 @@ const ProjectModal = ({
 }: ProjectModalProps) => {
 
     const overlayRef = useRef<HTMLDivElement>(null);
-    const modalRef = useRef<HTMLDivElement>(null);
+    const modalRef = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
+        const modal = modalRef.current;
+        if (!modal) return;
+        const previouslyFocused = document.activeElement;
+        modal.showModal();
+
         const ctx = gsap.context(() => {
 
             gsap.fromTo(
@@ -49,13 +54,28 @@ const ProjectModal = ({
 
         });
 
-        return () => ctx.revert();
+        return () => {
+            ctx.revert();
+            modal.close();
+            if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
+        };
     }, []);
 
     return (
-        <div
+        <dialog
             ref={modalRef}
-            className="fixed inset-0 z-50 w-screen h-screen"
+            aria-label={project.title}
+            onCancel={(event) => {
+                event.preventDefault();
+                onClose();
+            }}
+            onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                    event.preventDefault();
+                    onClose();
+                }
+            }}
+            className="fixed inset-0 m-0 h-screen max-h-none w-screen max-w-none border-0 bg-transparent p-0 backdrop:bg-transparent"
         >
             <div
                 ref={overlayRef}
@@ -68,7 +88,7 @@ const ProjectModal = ({
                     onNext={onNext}
                 />
             </div>
-        </div>
+        </dialog>
     );
 };
 

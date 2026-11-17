@@ -6,7 +6,7 @@ import gif from "../assets/videos/video_projects.mp4";
 import ProjectModal from "../components/ProjectModal";
 import ProjectPreview from "../components/ProjectPreview";
 import gsap from 'gsap';
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "../i18n/translations";
 
 let hasHoveredInSession = false;
@@ -14,17 +14,16 @@ let hasHoveredInSession = false;
 const ProjectsPage = () => {
     const text = useTranslation();
     const backgroundRef = useRef<HTMLDivElement>(null);
-    const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>();
-
     const projectsState = useProjects();
     const projectList = projectsState.projects;
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
     const [hoveredProjectId, setHoveredProjectId] = useState<string | number | null>(null);
     const [alreadyHovered, setAlreadyHovered] = useState<boolean>(hasHoveredInSession);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
-    const selectedProject = projectList.find(project => String(project.id) === id);
+    const selectedProject = projectList.find(project => project.id === selectedProjectId);
+    const isProjectOpen = Boolean(selectedProject);
 
     const navBarRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +48,7 @@ const ProjectsPage = () => {
                 ? projectList.length - 1
                 : currentIndex - 1;
 
-        navigate(`/projects/${projectList[previousIndex].id}`);
+        setSelectedProjectId(projectList[previousIndex].id);
     }
 
     function setNextProject() {
@@ -64,23 +63,16 @@ const ProjectsPage = () => {
                 ? 0
                 : currentIndex + 1
 
-        navigate(`/projects/${projectList[nextIndex].id}`);
+        setSelectedProjectId(projectList[nextIndex].id);
     }
 
     useEffect(() => {
-        if (selectedProject) {
-            gsap.to(navBarRef.current, {
-                opacity: 0,
-                ease: "power2.inOut",
-            });
-        }
-        else {
-            gsap.to(navBarRef.current, {
-                opacity: 1,
-                ease: "power2.inOut",
-            });
-        }
-    }, [selectedProject]);
+        const animation = gsap.to(navBarRef.current, {
+            opacity: isProjectOpen ? 0 : 1,
+            ease: "power2.inOut",
+        });
+        return () => { animation.kill(); };
+    }, [isProjectOpen]);
 
 
     return (
@@ -104,46 +96,52 @@ const ProjectsPage = () => {
                 }}
             >
                 {projectList.map((project, index) => (
-                    <Link
+                    <div
                         key={project.id}
-                        to={`/projects/${project.id}`}
-                        className="group relative flex w-full flex-row items-center gap-3 px-4 transition-colors duration-500 ease-in-out hover:text-gray-600 sm:gap-8 sm:px-11 lg:gap-25"
+                        className="group relative w-full"
                         onMouseEnter={() => handleMouseEnter(project.id)}
                         onMouseLeave={() => setHoveredProjectId(null)}
                     >
-                        <div className="m-0 mt-auto flex min-w-0 flex-1 flex-col items-start sm:w-64 sm:flex-none">
-                            <h3 className="text-2xl font-normal m-0 leading-none transition-all duration-400 group-hover:-skew-x-10">
-                                {project.title}
-                            </h3>
-                            <div className="flex flex-wrap m-0 leading-none -mt-0.5">
-                                {project.tags.map((tag, tagIndex) => (
-                                    <div
-                                        key={tag}
-                                        className="flex items-center leading-none"
-                                    >
-                                        <span className="text-sm font-normal">
-                                            {tag}
-                                        </span>
-
-                                        {tagIndex < project.tags.length - 1 && (
-                                            <span className="mx-2">
-                                                /
+                        <button
+                            type="button"
+                            aria-haspopup="dialog"
+                            onClick={() => setSelectedProjectId(project.id)}
+                            className="flex w-full cursor-pointer flex-row items-center gap-3 px-4 text-left transition-colors duration-500 ease-in-out hover:text-gray-600 sm:gap-8 sm:px-11 lg:gap-25"
+                        >
+                            <span className="m-0 mt-auto flex min-w-0 flex-1 flex-col items-start sm:w-64 sm:flex-none">
+                                <span className="text-2xl font-normal m-0 leading-none transition-all duration-400 group-hover:-skew-x-10">
+                                    {project.title}
+                                </span>
+                                <span className="flex flex-wrap m-0 leading-none -mt-0.5">
+                                    {project.tags.map((tag, tagIndex) => (
+                                        <span
+                                            key={tag}
+                                            className="flex items-center leading-none"
+                                        >
+                                            <span className="text-sm font-normal">
+                                                {tag}
                                             </span>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
 
-                        <div className="mt-auto flex w-12 shrink-0 justify-between text-base font-normal italic sm:w-22">
-                            <span>(</span>
-                            <span>{` 0${index + 1} `}</span>
-                            <span>)</span>
-                        </div>
+                                            {tagIndex < project.tags.length - 1 && (
+                                                <span className="mx-2">
+                                                    /
+                                                </span>
+                                            )}
+                                        </span>
+                                    ))}
+                                </span>
+                            </span>
 
-                        <span className="text-base font-normal mt-auto">
-                            {project.year}
-                        </span>
+                            <span className="mt-auto flex w-12 shrink-0 justify-between text-base font-normal italic sm:w-22">
+                                <span>(</span>
+                                <span>{` 0${index + 1} `}</span>
+                                <span>)</span>
+                            </span>
+
+                            <span className="text-base font-normal mt-auto">
+                                {project.year}
+                            </span>
+                        </button>
 
                         {!alreadyHovered && index === 0 && (
                             <div className="pointer-events-none absolute bottom-0 left-250 hidden aspect-square w-90 lg:block">
@@ -162,7 +160,7 @@ const ProjectsPage = () => {
                                 project={project}
                             />
                         )}
-                    </Link>
+                    </div>
                 ))}
             </div>
 
@@ -170,17 +168,10 @@ const ProjectsPage = () => {
             {projectsState.status === "error" && <p role="alert" className="p-8">{projectsState.message}</p>}
             {projectsState.status === "ready" && projectList.length === 0 && <p role="status" className="p-8">{text.noProjects}</p>}
 
-            {projectsState.status === "ready" && id && !selectedProject && (
-                <div role="status" className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[rgba(255,254,253,1)]">
-                    <p>{text.projectNotFound}</p>
-                    <Link to="/projects" className="mt-4 underline">{text.backToProjects}</Link>
-                </div>
-            )}
-
             {selectedProject && (
                 <ProjectModal
                     project={selectedProject}
-                    onClose={() => navigate("/projects")}
+                    onClose={() => setSelectedProjectId(null)}
                     onPrevious={setPreviousProject}
                     onNext={setNextProject}
                 />

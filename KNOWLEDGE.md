@@ -15,6 +15,7 @@
 - Contacto: `NavBar` abre `ContactModal` sobre la página actual; el diálogo se cierra con botón, Escape o clic fuera. En MainPage, `onContactOpenChange` sincroniza la animación del título.
 - Idioma: `LanguageProvider` comparte la selección entre rutas, la guarda en el navegador y utiliza español por defecto; no modifica las URL.
 - Proyectos de Contentful: se solicitan todos los locales y se seleccionan los textos del idioma activo; los campos compartidos y archivos multimedia pueden usar `es`, sin sustituir traducciones de texto ausentes.
+- Detalle de proyectos: se abre como diálogo sobre `/projects` sin cambiar la URL; las rutas antiguas con ID redirigen al listado.
 - Sobre mí: una entrada `sobreMi` aporta el texto localizado (biografía, formación y experiencia) y hasta dos fotos compartidas, que transicionan en un mismo marco desde debajo del menú hasta la parte inferior al bajar; el CV se gestiona por separado. Cuando el contenido no cabe en la pantalla, la página crece y permite recorrerlo completo.
 
 ## Estructura
