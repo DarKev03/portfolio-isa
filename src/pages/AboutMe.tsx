@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import gsap from 'gsap';
 
@@ -27,6 +27,8 @@ const AboutMe = () => {
     const aboutState = useAbout();
     const aboutContent = aboutState.status === 'ready' ? aboutState.content : null;
     const [firstPhoto, secondPhoto] = aboutContent?.photos ?? [];
+    const [usesFlowLayout, setUsesFlowLayout] = useState(false);
+    const longContentWidth = firstPhoto ? 'max-w-[calc(100%-min(168px,30vw)-32px)]' : 'max-w-full';
     const sectionRef = useRef<HTMLDivElement>(null);
 
     const img2Ref = useRef<HTMLImageElement>(null);
@@ -42,6 +44,40 @@ const AboutMe = () => {
     const bioRef = useRef<HTMLDivElement>(null);
     const cvRef = useRef<HTMLDivElement>(null);
     const footerRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+        const bio = bioRef.current;
+        const cv = cvRef.current;
+        const footer = footerRef.current;
+        const title = titleContentRef.current;
+        if (!bio || !cv || !footer || !title) return;
+
+        const updateLayout = () => {
+            const bioStyle = getComputedStyle(bio);
+            // Compare the same padding in both layouts to avoid switching back and forth.
+            const bioHeight = bio.offsetHeight - parseFloat(bioStyle.paddingTop) + parseFloat(bioStyle.paddingBottom);
+            setUsesFlowLayout(
+                window.innerWidth < 768 ||
+                title.getBoundingClientRect().bottom + bioHeight + cv.offsetHeight + footer.offsetHeight > window.innerHeight,
+            );
+        };
+
+        let refreshFrame = 0;
+        const observer = new ResizeObserver(() => {
+            updateLayout();
+            cancelAnimationFrame(refreshFrame);
+            refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh());
+        });
+        [bio, cv, footer, title].forEach(element => observer.observe(element));
+        window.addEventListener('resize', updateLayout);
+        updateLayout();
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('resize', updateLayout);
+            cancelAnimationFrame(refreshFrame);
+        };
+    }, []);
 
 
     useEffect(() => {
@@ -129,84 +165,86 @@ const AboutMe = () => {
             });
 
 
-            /*
-             * Bio.
-             */
-            gsap.to(bioRef.current, {
+            if (!usesFlowLayout) {
+                /*
+                 * Bio.
+                 */
+                gsap.to(bioRef.current, {
 
-                y: () => {
+                    y: () => {
 
-                    const titleRect =
-                        titleContentRef.current!.getBoundingClientRect();
+                        const titleRect =
+                            titleContentRef.current!.getBoundingClientRect();
 
-                    const bioRect =
-                        bioRef.current!.getBoundingClientRect();
+                        const bioRect =
+                            bioRef.current!.getBoundingClientRect();
 
-                    return titleRect.bottom - bioRect.top;
-                },
+                        return titleRect.bottom - bioRect.top;
+                    },
 
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top top',
-                    end: '+=300',
-                    scrub: true,
-                    invalidateOnRefresh: true,
-                },
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: 'top top',
+                        end: '+=300',
+                        scrub: true,
+                        invalidateOnRefresh: true,
+                    },
 
-            });
-
-
-            /*
-             * Footer.
-             */
-            gsap.to(footerRef.current, {
-
-                opacity: 1,
-
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top top',
-                    end: '+=300',
-                    scrub: true,
-                    invalidateOnRefresh: true,
-                },
-
-            });
+                });
 
 
-            /*
-             * CV.
-             */
-            gsap.to(cvRef.current, {
+                /*
+                 * Footer.
+                 */
+                gsap.to(footerRef.current, {
 
-                opacity: 1,
+                    opacity: 1,
 
-                y: () => {
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: 'top top',
+                        end: '+=300',
+                        scrub: true,
+                        invalidateOnRefresh: true,
+                    },
 
-                    const bioRect =
-                        bioRef.current!.getBoundingClientRect();
+                });
 
-                    const cvRect =
-                        cvRef.current!.getBoundingClientRect();
 
-                    const titleRect =
-                        titleContentRef.current!.getBoundingClientRect();
+                /*
+                 * CV.
+                 */
+                gsap.to(cvRef.current, {
 
-                    return (
-                        (titleRect.bottom - bioRect.top) +
-                        (bioRect.bottom - cvRect.top)
-                    );
-                },
+                    opacity: 1,
 
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top top',
-                    end: '+=300',
-                    scrub: true,
-                    invalidateOnRefresh: true,
-                },
+                    y: () => {
 
-            });
+                        const bioRect =
+                            bioRef.current!.getBoundingClientRect();
+
+                        const cvRect =
+                            cvRef.current!.getBoundingClientRect();
+
+                        const titleRect =
+                            titleContentRef.current!.getBoundingClientRect();
+
+                        return (
+                            (titleRect.bottom - bioRect.top) +
+                            (bioRect.bottom - cvRect.top)
+                        );
+                    },
+
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: 'top top',
+                        end: '+=300',
+                        scrub: true,
+                        invalidateOnRefresh: true,
+                    },
+
+                });
+            }
 
         }, sectionRef);
 
@@ -214,7 +252,7 @@ const AboutMe = () => {
         ScrollTrigger.refresh();
         return () => ctx.revert();
 
-    }, [aboutContent, aboutState.status]);
+    }, [aboutContent, aboutState.status, usesFlowLayout]);
 
 
     useEffect(() => {
@@ -230,11 +268,11 @@ const AboutMe = () => {
 
     return (
 
-        <div className="h-[150vh] bg-[#fffefd] no-scrollbar">
+        <div className={`${usesFlowLayout ? 'min-h-[150vh]' : 'h-[150vh]'} bg-[#fffefd] no-scrollbar`}>
 
             <div
                 ref={sectionRef}
-                className="sticky top-0 h-screen w-screen overflow-hidden text-[#414141]"
+                className={`${usesFlowLayout ? 'relative flex min-h-[150vh] w-full flex-col' : 'sticky top-0 h-screen w-screen overflow-hidden'} text-[#414141]`}
             >
 
                 {/* TITLE */}
@@ -290,7 +328,7 @@ const AboutMe = () => {
                     ref={imageContainerRef}
                     className={`pointer-events-none fixed top-0 right-0 z-50 pb-8 pr-8 ${firstPhoto ? '' : 'invisible'}`}
                 >
-                    <div className="relative h-[224px] w-[168px] overflow-hidden">
+                    <div className={`relative overflow-hidden ${usesFlowLayout ? 'aspect-[3/4] w-[min(168px,30vw)]' : 'h-[224px] w-[168px]'}`}>
                         {firstPhoto && <img src={firstPhoto.url} alt={firstPhoto.alt} className="h-full w-full object-cover" />}
                         {secondPhoto && <img ref={img2Ref} src={secondPhoto.url} alt={secondPhoto.alt} className="absolute inset-0 h-full w-full object-cover opacity-0" />}
                     </div>
@@ -302,7 +340,7 @@ const AboutMe = () => {
 
                 <div
                     ref={bioRef}
-                    className="absolute bottom-0 left-0 z-50 w-140 p-8 text-lg leading-tight"
+                    className={`${usesFlowLayout ? `relative pt-64 sm:pt-24 ${longContentWidth} [overflow-wrap:anywhere]` : 'absolute bottom-0 left-0'} z-50 w-140 p-8 text-lg leading-tight`}
                     style={{
                         fontFamily: 'Castoro, sans-serif'
                     }}
@@ -327,7 +365,7 @@ const AboutMe = () => {
 
                 <div
                     ref={cvRef}
-                    className="absolute bottom-0 left-0 z-50 w-140 p-8 flex flex-col gap-7 opacity-0"
+                    className={`${usesFlowLayout ? `relative mt-auto ${longContentWidth} [overflow-wrap:anywhere]` : 'absolute bottom-0 left-0 opacity-0'} z-50 w-140 p-8 flex flex-col gap-7`}
                     onFocusCapture={() => {
                         if (cvRef.current && Number(getComputedStyle(cvRef.current).opacity) < 1) {
                             window.scrollTo(0, document.documentElement.scrollHeight);
@@ -352,7 +390,7 @@ const AboutMe = () => {
 
                 <div
                     ref={footerRef}
-                    className="absolute bottom-0 left-0 z-50 w-140 p-8 flex flex-row gap-8 text-md italic leading-tight align-baseline text-[#4C4C4C] opacity-0"
+                    className={`${usesFlowLayout ? `relative flex-wrap ${longContentWidth} [overflow-wrap:anywhere]` : 'absolute bottom-0 left-0 opacity-0'} z-50 w-140 p-8 flex flex-row gap-8 text-md italic leading-tight align-baseline text-[#4C4C4C]`}
                     style={{
                         fontFamily: 'Castoro, sans-serif'
                     }}
