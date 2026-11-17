@@ -4,7 +4,7 @@ import { createServer, resolveConfig } from 'vite';
 
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 after(() => server.close());
-const { parseProject, getContentImages } = await server.ssrLoadModule('/src/contentful/projects.ts');
+const { parseProject, parseLocalizedProject, getContentImages } = await server.ssrLoadModule('/src/contentful/projects.ts');
 const { parseCv } = await server.ssrLoadModule('/src/contentful/cv.ts');
 
 test('configura Contentful aunque el antiguo interruptor esté desactivado', async () => {
@@ -98,6 +98,61 @@ test('admite contenido válido, conserva el año y extrae imágenes', () => {
   assert.equal(project.id, 'project-id');
   assert.equal(project.year, 2024);
   assert.deepEqual(getContentImages(project.richContent, project.title), [project.image]);
+});
+
+function localizedEntry() {
+  const asset = {
+    fields: {
+      title: { es: 'Imagen', en: 'Image' },
+      file: { es: { url: '//images.ctfassets.net/space/es.jpg' } },
+    },
+  };
+  const content = text => ({
+    nodeType: 'document',
+    data: {},
+    content: [
+      { nodeType: 'paragraph', data: {}, content: [{ nodeType: 'text', value: text, marks: [], data: {} }] },
+      { nodeType: 'embedded-asset-block', data: { target: asset }, content: [] },
+    ],
+  });
+  return {
+    sys: { id: 'localized' },
+    fields: {
+      titulo: { es: 'Proyecto', en: 'Project' },
+      categorias: { es: ['Diseño'], en: ['Design'] },
+      portada: { es: asset },
+      textoProyecto: { es: content('Texto'), en: content('Text') },
+      fechaPublicacin: { es: '2024-01-01' },
+    },
+  };
+}
+
+test('elige campos localizados y conserva archivos compartidos en imágenes insertadas y portada', () => {
+  const project = localizedEntry();
+  const spanish = parseLocalizedProject(project, 'es');
+  const english = parseLocalizedProject(project, 'en');
+  assert.equal(spanish.title, 'Proyecto');
+  assert.equal(english.title, 'Project');
+  assert.deepEqual(english.tags, ['Design']);
+  assert.equal(english.imageAlt, 'Image');
+  assert.equal(english.image, 'https://images.ctfassets.net/space/es.jpg');
+  assert.deepEqual(getContentImages(english.richContent, english.title, 'en'), [english.image]);
+
+  project.fields.portada.es.fields.file.en = { url: '//images.ctfassets.net/space/en.jpg' };
+  assert.equal(parseLocalizedProject(project, 'en').image, 'https://images.ctfassets.net/space/en.jpg');
+  assert.deepEqual(getContentImages(english.richContent, english.title, 'en'), ['https://images.ctfassets.net/space/en.jpg']);
+});
+
+test('no sustituye texto traducible ausente ni archivos localizados inválidos', () => {
+  const project = localizedEntry();
+  delete project.fields.titulo.en;
+  assert.throws(() => parseLocalizedProject(project, 'en'), /faltan traducciones \(en\): titulo/);
+  project.fields.titulo.en = 'Project';
+  delete project.fields.textoProyecto.en;
+  assert.throws(() => parseLocalizedProject(project, 'en'), /faltan traducciones \(en\): textoProyecto/);
+  project.fields.textoProyecto.en = project.fields.textoProyecto.es;
+  project.fields.portada.es.fields.file.en = { url: 'https://example.com/image.jpg' };
+  assert.throws(() => parseLocalizedProject(project, 'en'), /origen no permitido/);
 });
 
 test('rechaza campos obligatorios incompletos', () => {

@@ -1,6 +1,7 @@
 import { BLOCKS, INLINES, type Block, type Document, type Inline } from "@contentful/rich-text-types";
 import { z } from "zod";
 import type { CmsProject } from "../types/CmsProject";
+import type { Language } from "../types/Language";
 import { ContentfulDataError, getContentfulClient } from "./client";
 
 const assetSchema = z.object({
@@ -11,8 +12,29 @@ const assetSchema = z.object({
     }),
 });
 
-export function readImage(value: unknown, fallbackAlt: string) {
-    const asset = assetSchema.safeParse(value);
+const localizedAssetSchema = z.object({
+    fields: z.object({
+        title: z.record(z.string(), z.unknown()).optional(),
+        description: z.record(z.string(), z.unknown()).optional(),
+        file: z.record(z.string(), z.unknown()),
+    }),
+});
+
+export function readImage(value: unknown, fallbackAlt: string, locale: Language = "es") {
+    let asset = assetSchema.safeParse(value);
+    if (!asset.success) {
+        const localized = localizedAssetSchema.safeParse(value);
+        if (localized.success) {
+            const fields = localized.data.fields;
+            asset = assetSchema.safeParse({
+                fields: {
+                    title: fields.title?.[locale] ?? fields.title?.es,
+                    description: fields.description?.[locale] ?? fields.description?.es,
+                    file: fields.file[locale] ?? fields.file.es,
+                },
+            });
+        }
+    }
     if (!asset.success) throw new ContentfulDataError("Una imagen de Contentful no está disponible.", "A Contentful image is unavailable.");
 
     const rawUrl = asset.data.fields.file.url;
@@ -60,7 +82,7 @@ function isDocument(value: unknown): value is Document {
     }).safeParse(value).success;
 }
 
-function validateNodes(node: Block | Inline, title: string): void {
+function validateNodes(node: Block | Inline, title: string, locale: Language): void {
     const supportedNodes: string[] = [
         BLOCKS.PARAGRAPH, BLOCKS.HEADING_1, BLOCKS.HEADING_2, BLOCKS.HEADING_3,
         BLOCKS.HEADING_4, BLOCKS.HEADING_5, BLOCKS.HEADING_6, BLOCKS.UL_LIST,
@@ -72,7 +94,7 @@ function validateNodes(node: Block | Inline, title: string): void {
         throw new ContentfulDataError("El proyecto contiene un bloque no compatible.", "The project contains an unsupported block.");
     }
     if (node.nodeType === BLOCKS.EMBEDDED_ASSET) {
-        readImage(node.data.target, title);
+        readImage(node.data.target, title, locale);
     }
     if (node.nodeType === INLINES.HYPERLINK) {
         const href = z.string().safeParse(node.data.uri);
@@ -81,14 +103,14 @@ function validateNodes(node: Block | Inline, title: string): void {
         }
     }
     for (const child of node.content) {
-        if ("content" in child) validateNodes(child, title);
+        if ("content" in child) validateNodes(child, title, locale);
     }
 }
 
-export function getContentImages(document: Document, title: string): string[] {
+export function getContentImages(document: Document, title: string, locale: Language = "es"): string[] {
     const images: string[] = [];
     function visit(node: Block | Inline) {
-        if (node.nodeType === BLOCKS.EMBEDDED_ASSET) images.push(readImage(node.data.target, title).url);
+        if (node.nodeType === BLOCKS.EMBEDDED_ASSET) images.push(readImage(node.data.target, title, locale).url);
         for (const child of node.content) {
             if ("content" in child) visit(child);
         }
@@ -108,7 +130,7 @@ const entrySchema = z.object({
     }),
 });
 
-export function parseProject(value: unknown): CmsProject {
+export function parseProject(value: unknown, locale: Language = "es"): CmsProject {
     const result = entrySchema.safeParse(value);
     if (!result.success) {
         const fields = [...new Set(result.error.issues.map(issue => issue.path.slice(0, 2).join(".")))];
@@ -119,11 +141,11 @@ export function parseProject(value: unknown): CmsProject {
     }
 
     const { sys, fields } = result.data;
-    const image = readImage(fields.portada, fields.titulo);
+    const image = readImage(fields.portada, fields.titulo, locale);
     if (!isDocument(fields.textoProyecto)) {
         throw new ContentfulDataError("El texto enriquecido de un proyecto no es válido.", "A project's rich text is invalid.");
     }
-    for (const node of fields.textoProyecto.content) validateNodes(node, fields.titulo);
+    for (const node of fields.textoProyecto.content) validateNodes(node, fields.titulo, locale);
 
     return {
         id: sys.id,
@@ -136,15 +158,50 @@ export function parseProject(value: unknown): CmsProject {
     };
 }
 
-export async function fetchProjects(locale: "es" | "en"): Promise<CmsProject[]> {
-    const client = getContentfulClient();
+const localizedEntrySchema = z.object({
+    sys: z.object({ id: z.string().min(1) }),
+    fields: z.record(z.string(), z.record(z.string(), z.unknown())),
+});
+
+export function parseLocalizedProject(value: unknown, locale: Language): CmsProject {
+    const result = localizedEntrySchema.safeParse(value);
+    if (!result.success) {
+        throw new ContentfulDataError(
+            "Un proyecto publicado tiene campos localizados inválidos.",
+            "A published project has invalid localized fields.",
+        );
+    }
+    const { sys, fields } = result.data;
+    const missingFields = [
+        fields.titulo?.[locale] === undefined ? "titulo" : null,
+        fields.textoProyecto?.[locale] === undefined ? "textoProyecto" : null,
+    ].filter(field => field !== null);
+    if (missingFields.length > 0) {
+        throw new ContentfulDataError(
+            `Al proyecto ${sys.id} le faltan traducciones (${locale}): ${missingFields.join(", ")}.`,
+            `Project ${sys.id} is missing translations (${locale}): ${missingFields.join(", ")}.`,
+        );
+    }
+    return parseProject({
+        sys,
+        fields: {
+            titulo: fields.titulo?.[locale],
+            categorias: fields.categorias?.[locale],
+            textoProyecto: fields.textoProyecto?.[locale],
+            portada: fields.portada?.es,
+            fechaPublicacin: fields.fechaPublicacin?.es,
+        },
+    }, locale);
+}
+
+export async function fetchProjects(locale: Language): Promise<CmsProject[]> {
+    const client = getContentfulClient().withAllLocales;
 
     const projects: CmsProject[] = [];
     let total = 0;
     do {
         const response = await client.getEntries({
             content_type: "proyecto",
-            locale,
             limit: 100,
             skip: projects.length,
             include: 4,
@@ -153,7 +210,7 @@ export async function fetchProjects(locale: "es" | "en"): Promise<CmsProject[]> 
         if (response.items.length === 0 && projects.length < total) {
             throw new ContentfulDataError("No se pudieron recuperar todos los proyectos.", "Could not retrieve all projects.");
         }
-        projects.push(...response.items.map(parseProject));
+        projects.push(...response.items.map(item => parseLocalizedProject(item, locale)));
     } while (projects.length < total);
     return projects;
 }

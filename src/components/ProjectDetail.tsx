@@ -5,6 +5,7 @@ import type { DisplayProject } from "../types/CmsProject";
 import { ContentBlock } from "../types/ContentBlock";
 import { readImage } from "../contentful/projects";
 import { useTranslation } from "../i18n/translations";
+import { useLanguage } from "../i18n/languageContext";
 
 interface ProjectDetailProps {
     project: DisplayProject;
@@ -15,6 +16,7 @@ interface ProjectDetailProps {
 
 const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailProps) => {
     const text = useTranslation();
+    const { language } = useLanguage();
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
     const [emblaRef] = useEmblaCarousel({
@@ -160,7 +162,7 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                                     { nodeType: BLOCKS.DOCUMENT, data: {}, content: [block] },
                                     { renderNode: {
                                         [BLOCKS.EMBEDDED_ASSET]: node => {
-                                            const image = readImage(node.data.target, project.title);
+                                            const image = readImage(node.data.target, project.title, language);
                                             return <img src={image.url} alt={image.alt} className="w-full h-full object-contain" />;
                                         },
                                     } },

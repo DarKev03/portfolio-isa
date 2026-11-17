@@ -4,6 +4,7 @@ import { ContentfulDataError } from "./client";
 import { fetchProjects } from "./projects";
 import { useLanguage } from "../i18n/languageContext";
 import { useTranslation } from "../i18n/translations";
+import type { Language } from "../types/Language";
 
 type ProjectsState =
     | { status: "loading"; projects: [] }
@@ -18,33 +19,37 @@ type InternalProjectsState =
 export function useProjects(): ProjectsState {
     const { language } = useLanguage();
     const text = useTranslation();
-    const [state, setState] = useState<InternalProjectsState>({ status: "loading", projects: [] });
+    const [state, setState] = useState<{ language: Language; result: InternalProjectsState }>({
+        language,
+        result: { status: "loading", projects: [] },
+    });
 
     useEffect(() => {
         let isActive = true;
-        fetchProjects("es").then(
+        fetchProjects(language).then(
             projects => {
-                if (isActive) setState({ status: "ready", projects });
+                if (isActive) setState({ language, result: { status: "ready", projects } });
             },
             error => {
                 if (isActive) setState({
-                    status: "error",
-                    projects: [],
-                    error,
+                    language,
+                    result: { status: "error", projects: [], error },
                 });
             },
         );
         return () => { isActive = false; };
-    }, []);
+    }, [language]);
 
-    if (state.status === "error") {
+    if (state.language !== language) return { status: "loading", projects: [] };
+    const result = state.result;
+    if (result.status === "error") {
         return {
             status: "error",
             projects: [],
-            message: state.error instanceof ContentfulDataError
-                ? state.error.forLanguage(language)
+            message: result.error instanceof ContentfulDataError
+                ? result.error.forLanguage(language)
                 : text.projectLoadError,
         };
     }
-    return state;
+    return result;
 }

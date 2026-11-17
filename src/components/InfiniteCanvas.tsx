@@ -2,6 +2,7 @@ import { useGesture } from "@use-gesture/react";
 import { useEffect, useRef, useState } from "react";
 import { getContentImages } from "../contentful/projects";
 import { useProjects } from "../contentful/useProjects";
+import { useLanguage } from "../i18n/languageContext";
 
 const CELL_W = 280;
 const CELL_H = 190;
@@ -11,10 +12,11 @@ const STEP_Y = CELL_H + GAP;
 const MARGIN = 3;
 
 const InfiniteCanvas = () => {
+  const { language } = useLanguage();
   const projectsState = useProjects();
   const imagePool = projectsState.projects.flatMap(project => [
     project.image,
-    ...getContentImages(project.richContent, project.title),
+    ...getContentImages(project.richContent, project.title, language),
   ]);
   const viewRef = useRef<HTMLDivElement>(null);
   const inertiaFrameRef = useRef<number | null>(null);
