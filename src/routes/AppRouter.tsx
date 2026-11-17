@@ -1,12 +1,15 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import MainPage from '../pages/MainPage';
 import ProjectsPage from '../pages/ProjectsPage';
 import AboutMe from '../pages/AboutMe.tsx';
 import NotFoundPage from '../pages/NotFoundPage';
+import PageErrorBoundary from '../components/PageErrorBoundary';
 
-const AppRouter = () => {
+const PageRoutes = () => {
+    const { pathname } = useLocation();
+
     return (
-        <BrowserRouter>
+        <PageErrorBoundary pathname={pathname}>
             <Routes>
                 <Route path="/" element={<MainPage />} />
                 <Route path="/aboutme" element={<AboutMe />} />
@@ -14,6 +17,14 @@ const AppRouter = () => {
                 <Route path="/projects/:id" element={<ProjectsPage />} />
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>
+        </PageErrorBoundary>
+    );
+};
+
+const AppRouter = () => {
+    return (
+        <BrowserRouter>
+            <PageRoutes />
         </BrowserRouter>
     );
 };

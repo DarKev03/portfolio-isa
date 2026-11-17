@@ -5,6 +5,7 @@
 - `NavBar.tsx` — navegación con Links + LanguageSelector
 - `ProjectModal.tsx` — overlay de proyecto al hacer click
 - `ProjectDetail.tsx` — contenido del modal
+- `PageErrorBoundary.tsx` — reintento automático único por ruta ante errores de renderizado; si vuelve a fallar, ofrece volver al inicio. Los errores de carga asíncrona se gestionan por separado.
 
 ## Anotaciones
 - Git: usar `git pull --rebase` + `git push --force-with-lease`; al rebasar, evitar vim con `GIT_EDITOR=true`.
