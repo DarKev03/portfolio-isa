@@ -16,6 +16,7 @@ import { useAbout } from '../contentful/useAbout';
 import { readImage } from '../contentful/projects';
 import { useTranslation } from '../i18n/translations';
 import { useReducedMotion } from '../components/useReducedMotion';
+import ContentImage from '../components/ContentImage';
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -30,6 +31,7 @@ const AboutMe = () => {
     const aboutContent = aboutState.status === 'ready' ? aboutState.content : null;
     const [firstPhoto, secondPhoto] = aboutContent?.photos ?? [];
     const [needsFlowLayout, setNeedsFlowLayout] = useState(false);
+    const [hasPhotoError, setHasPhotoError] = useState(false);
     const usesFlowLayout = reducedMotion || needsFlowLayout;
     const longContentWidth = firstPhoto ? 'max-w-[calc(100%-min(168px,30vw)-32px)]' : 'max-w-full';
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -342,8 +344,8 @@ const AboutMe = () => {
                     className={`pointer-events-none fixed top-0 right-0 z-50 pb-8 pr-8 ${firstPhoto ? '' : 'invisible'}`}
                 >
                     <div className={`relative overflow-hidden ${usesFlowLayout ? 'aspect-[3/4] w-[min(168px,30vw)]' : 'h-[224px] w-[168px]'}`}>
-                        {firstPhoto && <img src={firstPhoto.url} alt={firstPhoto.alt} className="h-full w-full object-cover" />}
-                        {secondPhoto && <img ref={img2Ref} src={secondPhoto.url} alt={secondPhoto.alt} className="absolute inset-0 h-full w-full object-cover opacity-0" />}
+                        {firstPhoto && <img src={firstPhoto.url} alt={firstPhoto.alt} onError={() => setHasPhotoError(true)} className="h-full w-full object-cover" />}
+                        {secondPhoto && <img ref={img2Ref} src={secondPhoto.url} alt={secondPhoto.alt} onError={() => setHasPhotoError(true)} className="absolute inset-0 h-full w-full object-cover opacity-0" />}
                     </div>
 
                 </div>
@@ -362,11 +364,12 @@ const AboutMe = () => {
                     {aboutState.status === 'loading' && <p role="status">{text.loadingAbout}</p>}
                     {aboutState.status === 'unavailable' && <p role="status">{text.unavailableAbout}</p>}
                     {aboutState.status === 'error' && <p role="alert">{aboutState.message}</p>}
+                    {hasPhotoError && <p role="alert">{text.imageLoadError}</p>}
                     {aboutContent && documentToReactComponents(aboutContent.richContent, {
                         renderNode: {
                             [BLOCKS.EMBEDDED_ASSET]: node => {
                                 const image = readImage(node.data.target, 'Isabel Faubel', language);
-                                return <img src={image.url} alt={image.alt} />;
+                                return <ContentImage key={image.url} src={image.url} alt={image.alt} />;
                             },
                         },
                     })}

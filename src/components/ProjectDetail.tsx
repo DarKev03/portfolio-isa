@@ -9,6 +9,7 @@ import { useTranslation } from "../i18n/translations";
 import { useLanguage } from "../i18n/languageContext";
 import { useLayoutEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { useReducedMotion } from "./useReducedMotion";
+import ContentImage from "./ContentImage";
 
 const ProjectSection = ({ children }: { children: ReactNode }) => {
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -133,7 +134,7 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                             style={{ height: `${block.imageSize}%` }}
                             className="overflow-hidden mt-auto"
                         >
-                            <img
+                            <ContentImage
                                 src={block.image}
                                 alt=""
                                 className="w-full h-full object-cover"
@@ -152,7 +153,7 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                             style={{ height: `${block.imageSize}%` }}
                             className="overflow-hidden"
                         >
-                            <img
+                            <ContentImage
                                 src={block.image}
                                 alt=""
                                 className="w-full h-full object-cover"
@@ -172,7 +173,7 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                 return (
                     <div key={index} className={blockBaseClass}>
                         <div className="w-full h-full overflow-hidden">
-                            <img
+                            <ContentImage
                                 src={block.image}
                                 alt=""
                                 className="w-full h-full object-cover"
@@ -242,7 +243,7 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                                     { renderNode: {
                                         [BLOCKS.EMBEDDED_ASSET]: node => {
                                             const image = readImage(node.data.target, project.title, language);
-                                            return <img src={image.url} alt={image.alt} className="w-full h-auto object-contain" />;
+                                            return <ContentImage key={image.url} src={image.url} alt={image.alt} className="w-full h-auto object-contain" />;
                                         },
                                     } },
                                 )}
