@@ -56,7 +56,6 @@ const ProjectModal = ({
         <div
             ref={modalRef}
             className="fixed inset-0 z-50 w-screen h-screen"
-            onClick={onClose}
         >
             <div
                 ref={overlayRef}

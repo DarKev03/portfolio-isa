@@ -107,7 +107,6 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
     return (
         <div
             className="relative bg-transparent w-full h-full flex flex-col overflow-hidden"
-            onClick={onClose}
         >
             <div className="flex-none flex items-start pt-9 pl-11 pr-11 h-24 z-10">
                 <div className="ml-auto flex flex-row gap-5 text-base font-normal italic text-[rgba(65, 65, 65, 1)]">
