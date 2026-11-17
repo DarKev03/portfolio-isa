@@ -16,6 +16,7 @@
 - Galería de inicio: usa exclusivamente la entrada publicada `galeriaInicio` y su campo compartido `fotosGalera` (imágenes o vídeos); es una región enfocada después del menú y las flechas desplazan el lienzo en cuatro direcciones.
 - Idioma: `LanguageProvider` comparte la selección entre rutas, la guarda en el navegador y utiliza español por defecto; no modifica las URL.
 - Proyectos de Contentful: se solicitan todos los locales y se seleccionan los textos del idioma activo; los campos compartidos y archivos multimedia pueden usar `es`, sin sustituir traducciones de texto ausentes.
+- Listado de proyectos: muestra hasta las dos primeras categorías del idioma activo debajo del título, separadas por `/`; son opcionales.
 - Detalle de proyectos: se abre como diálogo sobre `/projects` sin cambiar la URL; las rutas antiguas con ID redirigen al listado.
 - Texto de proyectos: cada separador horizontal de Contentful delimita un panel de hasta media pantalla; texto e imágenes entre separadores conservan su orden y se reescalan juntos para caber sin scroll vertical. El ancho del panel se ajusta al contenido reescalado. El carrusel admite arrastre, rueda horizontal y flechas izquierda/derecha.
 - Sobre mí: una entrada `sobreMi` aporta el texto localizado (biografía, formación y experiencia) y hasta dos fotos compartidas, que transicionan en un mismo marco desde debajo del menú hasta la parte inferior al bajar; el CV se gestiona por separado. Cuando el contenido no cabe en la pantalla, la página crece y permite recorrerlo completo.

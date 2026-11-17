@@ -113,16 +113,16 @@ const ProjectsPage = () => {
                                     {project.title}
                                 </span>
                                 <span className="flex flex-wrap m-0 leading-none -mt-0.5">
-                                    {project.tags.map((tag, tagIndex) => (
+                                    {project.tags.slice(0, 2).map((tag, tagIndex) => (
                                         <span
-                                            key={tag}
+                                            key={`${tag}-${tagIndex}`}
                                             className="flex items-center leading-none"
                                         >
                                             <span className="text-sm font-normal">
                                                 {tag}
                                             </span>
 
-                                            {tagIndex < project.tags.length - 1 && (
+                                            {tagIndex === 0 && project.tags.length > 1 && (
                                                 <span className="mx-2">
                                                     /
                                                 </span>
