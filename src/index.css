@@ -22,6 +22,10 @@
     cursor: default !important;
 }
 
+.about-header:focus-within {
+    opacity: 1 !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         scroll-behavior: auto !important;
