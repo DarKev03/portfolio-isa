@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import type { DisplayProject } from "../types/CmsProject";
 import gsap from "gsap";
+import { useReducedMotion } from "./useReducedMotion";
 
 interface ProjectPreviewProps {
     project: DisplayProject;
@@ -9,6 +10,7 @@ interface ProjectPreviewProps {
 const ProjectPreview = ({ project }: ProjectPreviewProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLImageElement>(null);
+    const reducedMotion = useReducedMotion();
 
     useLayoutEffect(() => {
         const ctx = gsap.context(() => {
@@ -17,18 +19,18 @@ const ProjectPreview = ({ project }: ProjectPreviewProps) => {
             tl.fromTo(
                 containerRef.current,
                 {
-                    opacity: 0,                    
+                    opacity: reducedMotion ? 1 : 0,
                 },
                 {
                     opacity: 1,                    
-                    duration: 0.7,
+                    duration: reducedMotion ? 0 : 0.7,
                     ease: "power2.out",
                 }
             );
         }, containerRef);
 
         return () => ctx.revert();
-    }, []);
+    }, [reducedMotion]);
 
     return (
         <div

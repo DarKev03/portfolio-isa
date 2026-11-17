@@ -4,6 +4,7 @@ import gsap from "gsap";
 import InfiniteCanvas from "../components/InfiniteCanvas";
 import Title from "../components/Title";
 import NavBar from "../components/NavBar";
+import { useReducedMotion } from "../components/useReducedMotion";
 
 const MainPage = () => {
     const titleRef = useRef<HTMLDivElement>(null);
@@ -12,18 +13,21 @@ const MainPage = () => {
     const titleRef2 = useRef<HTMLDivElement>(null);
     const navBarRef = useRef<HTMLDivElement>(null);
     const pendingFocusRef = useRef<"first" | "last" | null>(null);
+    const reducedMotion = useReducedMotion();
 
-    const [hasIntroFinished, setHasIntroFinished] = useState(false);
+    const [hasIntroFinished, setHasIntroFinished] = useState(reducedMotion);
     const [hasInteracted, setHasInteracted] = useState(false);
     const [contactOpen, setContactOpen] = useState(false);
-    const secondTitleVisible = hasIntroFinished && hasInteracted;
+    const secondTitleVisible = reducedMotion || (hasIntroFinished && hasInteracted);
 
     useEffect(() => {
         const el = titleRef.current;
         const canvasEl = canvasRef.current;
         const backgroundEl = backgroundRef.current;
 
-        if (el && canvasEl && backgroundEl) {
+        if (reducedMotion) {
+            gsap.set([el, canvasEl, backgroundEl], { opacity: 1 });
+        } else if (el && canvasEl && backgroundEl) {
             const tl = gsap.timeline({ onComplete: () => setHasIntroFinished(true) });
             tl.fromTo(
                 backgroundEl,
@@ -44,7 +48,7 @@ const MainPage = () => {
                 );
             return () => { tl.kill(); };
         }
-    }, []);
+    }, [reducedMotion]);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -67,6 +71,11 @@ const MainPage = () => {
         const navBarEl = navBarRef.current;
 
         if (el2 && navBarEl && secondTitleVisible) {
+            if (reducedMotion) {
+                gsap.set(el, { opacity: 0 });
+                gsap.set([el2, navBarEl], { opacity: 1 });
+                return;
+            }
             const tl = gsap.timeline();
             tl.to(
                 el,
@@ -89,13 +98,17 @@ const MainPage = () => {
             }
             return () => { tl.kill(); };
         }
-    }, [secondTitleVisible]);
+    }, [secondTitleVisible, reducedMotion]);
 
     useEffect(() => {
         const titleEl = titleRef2.current;
 
         if (!titleEl) return;
 
+        if (reducedMotion) {
+            gsap.set(titleEl, { opacity: contactOpen ? 0 : 1 });
+            return;
+        }
         const tl = gsap.timeline();
 
         if (contactOpen) {
@@ -123,7 +136,7 @@ const MainPage = () => {
         return () => {
             tl.kill();
         };
-    }, [contactOpen]);
+    }, [contactOpen, reducedMotion, secondTitleVisible]);
 
     return (
         <div

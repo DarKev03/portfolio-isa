@@ -7,9 +7,11 @@ import ProjectPreview from "../components/ProjectPreview";
 import gsap from 'gsap';
 import { Link } from "react-router-dom";
 import { useTranslation } from "../i18n/translations";
+import { useReducedMotion } from "../components/useReducedMotion";
 
 const ProjectsPage = () => {
     const text = useTranslation();
+    const reducedMotion = useReducedMotion();
     const backgroundRef = useRef<HTMLDivElement>(null);
     const projectsState = useProjects();
     const projectList = projectsState.projects;
@@ -56,10 +58,11 @@ const ProjectsPage = () => {
     useEffect(() => {
         const animation = gsap.to(navBarRef.current, {
             opacity: isProjectOpen ? 0 : 1,
+            duration: reducedMotion ? 0 : 0.5,
             ease: "power2.inOut",
         });
         return () => { animation.kill(); };
-    }, [isProjectOpen]);
+    }, [isProjectOpen, reducedMotion]);
 
 
     return (

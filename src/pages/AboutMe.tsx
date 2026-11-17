@@ -15,6 +15,7 @@ import { documentToReactComponents } from '@contentful/rich-text-react-renderer'
 import { useAbout } from '../contentful/useAbout';
 import { readImage } from '../contentful/projects';
 import { useTranslation } from '../i18n/translations';
+import { useReducedMotion } from '../components/useReducedMotion';
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -24,10 +25,12 @@ const AboutMe = () => {
 
     const { language } = useLanguage();
     const text = useTranslation();
+    const reducedMotion = useReducedMotion();
     const aboutState = useAbout();
     const aboutContent = aboutState.status === 'ready' ? aboutState.content : null;
     const [firstPhoto, secondPhoto] = aboutContent?.photos ?? [];
-    const [usesFlowLayout, setUsesFlowLayout] = useState(false);
+    const [needsFlowLayout, setNeedsFlowLayout] = useState(false);
+    const usesFlowLayout = reducedMotion || needsFlowLayout;
     const longContentWidth = firstPhoto ? 'max-w-[calc(100%-min(168px,30vw)-32px)]' : 'max-w-full';
     const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +59,7 @@ const AboutMe = () => {
             const bioStyle = getComputedStyle(bio);
             // Compare the same padding in both layouts to avoid switching back and forth.
             const bioHeight = bio.offsetHeight - parseFloat(bioStyle.paddingTop) + parseFloat(bioStyle.paddingBottom);
-            setUsesFlowLayout(
+            setNeedsFlowLayout(
                 window.innerWidth < 768 ||
                 title.getBoundingClientRect().bottom + bioHeight + cv.offsetHeight + footer.offsetHeight > window.innerHeight,
             );
@@ -87,6 +90,16 @@ const AboutMe = () => {
             const imageContainer = imageContainerRef.current;
 
             if (!navBar || !imageContainer) return;
+
+            if (reducedMotion) {
+                const positionPhoto = () => gsap.set(imageContainer, {
+                    opacity: 1,
+                    y: navBar.getBoundingClientRect().bottom + 20,
+                });
+                positionPhoto();
+                window.addEventListener('resize', positionPhoto);
+                return () => window.removeEventListener('resize', positionPhoto);
+            }
 
             gsap.set(imageContainer, {
                 opacity: 1,
@@ -252,7 +265,7 @@ const AboutMe = () => {
         ScrollTrigger.refresh();
         return () => ctx.revert();
 
-    }, [aboutContent, aboutState.status, usesFlowLayout]);
+    }, [aboutContent, aboutState.status, usesFlowLayout, reducedMotion]);
 
 
     useEffect(() => {
@@ -268,11 +281,11 @@ const AboutMe = () => {
 
     return (
 
-        <div className={`${usesFlowLayout ? 'min-h-[150vh]' : 'h-[150vh]'} bg-[#fffefd] no-scrollbar`}>
+        <div className={`${reducedMotion ? 'min-h-screen' : usesFlowLayout ? 'min-h-[150vh]' : 'h-[150vh]'} bg-[#fffefd] no-scrollbar`}>
 
             <div
                 ref={sectionRef}
-                className={`${usesFlowLayout ? 'relative flex min-h-[150vh] w-full flex-col' : 'sticky top-0 h-screen w-screen overflow-hidden'} text-[#414141]`}
+                className={`${usesFlowLayout ? `relative flex ${reducedMotion ? 'min-h-screen' : 'min-h-[150vh]'} w-full flex-col` : 'sticky top-0 h-screen w-screen overflow-hidden'} text-[#414141]`}
             >
 
                 {/* TITLE */}

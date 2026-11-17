@@ -2,6 +2,7 @@ import type { DisplayProject } from "../types/CmsProject";
 import ProjectDetail from "./ProjectDetail";
 import { useEffect, useRef } from "react";
 import gsap from 'gsap';
+import { useReducedMotion } from './useReducedMotion';
 
 interface ProjectModalProps {
     project: DisplayProject;
@@ -19,6 +20,7 @@ const ProjectModal = ({
 
     const overlayRef = useRef<HTMLDivElement>(null);
     const modalRef = useRef<HTMLDialogElement>(null);
+    const reducedMotion = useReducedMotion();
 
     useEffect(() => {
         const modal = modalRef.current;
@@ -30,10 +32,10 @@ const ProjectModal = ({
 
             gsap.fromTo(
                 overlayRef.current,
-                { opacity: 0 },
+                { opacity: reducedMotion ? 1 : 0 },
                 {
                     opacity: 1,
-                    duration: 0.4,
+                    duration: reducedMotion ? 0 : 0.4,
                     ease: "power2.out"
                 }
             );
@@ -41,13 +43,13 @@ const ProjectModal = ({
             gsap.fromTo(
                 modalRef.current,
                 {
-                    opacity: 0,
-                    x: 80,
+                    opacity: reducedMotion ? 1 : 0,
+                    x: reducedMotion ? 0 : 80,
                 },
                 {
                     opacity: 1,
                     x: 0,
-                    duration: 0.7,
+                    duration: reducedMotion ? 0 : 0.7,
                     ease: "power3.out"
                 }
             );
@@ -59,7 +61,7 @@ const ProjectModal = ({
             modal.close();
             if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
         };
-    }, []);
+    }, [reducedMotion]);
 
     return (
         <dialog

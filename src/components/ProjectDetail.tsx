@@ -8,6 +8,7 @@ import { readImage, splitProjectContent } from "../contentful/projects";
 import { useTranslation } from "../i18n/translations";
 import { useLanguage } from "../i18n/languageContext";
 import { useLayoutEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
+import { useReducedMotion } from "./useReducedMotion";
 
 const ProjectSection = ({ children }: { children: ReactNode }) => {
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -66,10 +67,12 @@ interface ProjectDetailProps {
 const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailProps) => {
     const text = useTranslation();
     const { language } = useLanguage();
+    const reducedMotion = useReducedMotion();
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
     const [emblaRef, emblaApi] = useEmblaCarousel({
-        dragFree: true,
+        dragFree: !reducedMotion,
+        duration: reducedMotion ? 0 : 25,
         containScroll: "trimSnaps",
         align: "start"
     }, [WheelGesturesPlugin()]);
@@ -81,18 +84,18 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
         if (event.key === "ArrowRight") {
             if (emblaApi.canScrollNext()) {
                 event.preventDefault();
-                emblaApi.scrollNext();
+                emblaApi.scrollNext(reducedMotion);
             } else if (emblaApi.scrollProgress() < 1) {
                 event.preventDefault();
-                emblaApi.scrollTo(emblaApi.scrollSnapList().length - 1);
+                emblaApi.scrollTo(emblaApi.scrollSnapList().length - 1, reducedMotion);
             }
         } else if (event.key === "ArrowLeft") {
             if (emblaApi.canScrollPrev()) {
                 event.preventDefault();
-                emblaApi.scrollPrev();
+                emblaApi.scrollPrev(reducedMotion);
             } else if (emblaApi.scrollProgress() > 0) {
                 event.preventDefault();
-                emblaApi.scrollTo(0);
+                emblaApi.scrollTo(0, reducedMotion);
             }
         }
     };

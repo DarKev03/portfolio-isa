@@ -1,6 +1,7 @@
 import { useEffect, useRef, type RefObject } from "react";
 import gsap from "gsap";
 import { useTranslation } from "../i18n/translations";
+import { useReducedMotion } from "./useReducedMotion";
 
 interface ContactModalProps {
     onClose: () => void;
@@ -9,6 +10,7 @@ interface ContactModalProps {
 
 const ContactModal = ({ onClose, returnFocusRef }: ContactModalProps) => {
     const text = useTranslation();
+    const reducedMotion = useReducedMotion();
     const modalRef = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
@@ -16,9 +18,9 @@ const ContactModal = ({ onClose, returnFocusRef }: ContactModalProps) => {
         if (!modal) return;
 
         modal.showModal();
-        const animation = gsap.fromTo(modal, { opacity: 0 }, {
+        const animation = gsap.fromTo(modal, { opacity: reducedMotion ? 1 : 0 }, {
             opacity: 1,
-            duration: 0.5,
+            duration: reducedMotion ? 0 : 0.5,
             ease: "power2.out",
         });
         return () => {
@@ -26,7 +28,7 @@ const ContactModal = ({ onClose, returnFocusRef }: ContactModalProps) => {
             modal.close();
             returnFocusRef.current?.focus();
         };
-    }, [returnFocusRef]);
+    }, [returnFocusRef, reducedMotion]);
 
     return (
         <dialog

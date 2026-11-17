@@ -2,6 +2,7 @@ import { useGesture } from "@use-gesture/react";
 import { useCallback, useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { useGallery } from "../contentful/useGallery";
 import { useTranslation } from "../i18n/translations";
+import { useReducedMotion } from "./useReducedMotion";
 
 const CELL_W = 280;
 const CELL_H = 190;
@@ -45,11 +46,12 @@ const GalleryVideo = ({ url, isPlaying, onError }: { url: string; isPlaying: boo
 
 const InfiniteCanvas = () => {
   const text = useTranslation();
+  const reducedMotion = useReducedMotion();
   const instructionsId = useId();
   const galleryState = useGallery();
   const mediaPool = galleryState.status === "ready" ? galleryState.media : [];
   const hasVideos = mediaPool.some(media => media.type === "video");
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(!reducedMotion);
   const [hasMediaError, setHasMediaError] = useState(false);
   const handleMediaError = useCallback(() => setHasMediaError(true), []);
   const viewRef = useRef<HTMLDivElement>(null);
@@ -59,6 +61,10 @@ const InfiniteCanvas = () => {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [viewW, setViewW] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
   const [viewH, setViewH] = useState(typeof window !== "undefined" ? window.innerHeight : 800);
+
+  useEffect(() => {
+    if (reducedMotion) setIsPlaying(false);
+  }, [reducedMotion]);
 
   const stopMotion = () => {
     if (inertiaFrameRef.current !== null) {
@@ -97,6 +103,7 @@ const InfiniteCanvas = () => {
         setOffset((o) => ({ x: o.x + dx, y: o.y + dy }));
       },
       onDragEnd: ({ velocity: [vx, vy] }) => {
+        if (reducedMotion) return;
         let velX = vx * 120;
         let velY = vy * 120;
         let last = performance.now();
