@@ -1,25 +1,14 @@
-import { useState } from 'react';
-import type { Language } from '../types/Language';
+import { useLanguage } from '../i18n/languageContext';
 
-interface LanguageSelectorProps {
-    onLanguageChange?: (language: Language) => void;
-}
-
-const LanguageSelector = ({ onLanguageChange }: LanguageSelectorProps) => {
-    const [isSpanish, setIsSpanish] = useState(true);
-
-    const selectLanguage = (language: Language) => {
-        setIsSpanish(language === 'es');
-        onLanguageChange?.(language);
-    };
-
+const LanguageSelector = () => {
+    const { language, setLanguage } = useLanguage();
     return (
         <div className="flex flex-row gap-1 text-right text-md">
-            <button className={`font-normal hover:underline cursor-pointer ${isSpanish ? '' : 'italic'}`} onClick={() => selectLanguage('en')}>
+            <button type="button" lang="en" aria-pressed={language === 'en'} className={`font-normal hover:underline cursor-pointer ${language === 'en' ? 'italic' : ''}`} onClick={() => setLanguage('en')}>
                 EN
             </button>
             <p className="font-normal">/</p>
-            <button className={`font-normal hover:underline cursor-pointer ${isSpanish ? 'italic' : ''}`} onClick={() => selectLanguage('es')}>
+            <button type="button" lang="es" aria-pressed={language === 'es'} className={`font-normal hover:underline cursor-pointer ${language === 'es' ? 'italic' : ''}`} onClick={() => setLanguage('es')}>
                 ES
             </button>
         </div>

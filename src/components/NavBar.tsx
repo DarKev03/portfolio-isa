@@ -3,14 +3,12 @@ import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import ContactModal from './ContactModal';
 import LanguageSelector from './LanguageSelector';
-import type { Language } from '../types/Language';
 
 interface NavBarProps {
     onContactOpenChange?: (isOpen: boolean) => void;
-    onLanguageChange?: (language: Language) => void;
 }
 
-const NavBar = ({ onContactOpenChange, onLanguageChange }: NavBarProps) => {
+const NavBar = ({ onContactOpenChange }: NavBarProps) => {
     const castoroFamily = { fontFamily: "'Castoro', serif" };
     const [isContactOpen, setIsContactOpen] = useState(false);
     const contactButtonRef = useRef<HTMLButtonElement>(null);
@@ -23,7 +21,7 @@ const NavBar = ({ onContactOpenChange, onLanguageChange }: NavBarProps) => {
     return (
         <nav className="flex flex-col items-end w-max">
             <div className="pb-14" style={{ ...castoroFamily }}>
-                <LanguageSelector onLanguageChange={onLanguageChange} />
+                <LanguageSelector />
             </div>
 
             <ul className="flex flex-col gap-2 text-base text-right" style={{ ...castoroFamily }}>

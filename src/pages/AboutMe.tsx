@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 import gsap from 'gsap';
 
@@ -8,7 +8,7 @@ import Title from '../components/Title';
 
 import NavBar from '../components/NavBar';
 import CvDownload from '../components/CvDownload';
-import type { Language } from '../types/Language';
+import { useLanguage } from '../i18n/languageContext';
 import { Link } from 'react-router-dom';
 
 
@@ -17,7 +17,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const AboutMe = () => {
 
-    const [language, setLanguage] = useState<Language>('es');
+    const { language } = useLanguage();
     const sectionRef = useRef<HTMLDivElement>(null);
 
     const imgRef = useRef<HTMLImageElement>(null);
@@ -290,7 +290,7 @@ const AboutMe = () => {
                     className="fixed top-0 right-0 z-50 p-8"
                 >
 
-                    <NavBar onLanguageChange={setLanguage} />
+                    <NavBar />
 
                 </div>
 
@@ -328,6 +328,7 @@ const AboutMe = () => {
 
                 <div
                     ref={bioRef}
+                    lang="es"
                     className="absolute bottom-0 left-0 z-50 w-140 p-8 text-lg leading-tight"
                     style={{
                         fontFamily: 'Castoro, sans-serif'
@@ -373,7 +374,7 @@ const AboutMe = () => {
                     }}
                 >
 
-                    <div>
+                    <div lang="es">
 
                         <h1 className="text-lg font-normal leading-tight">
 
@@ -392,7 +393,7 @@ const AboutMe = () => {
                     </div>
 
 
-                    <div>
+                    <div lang="es">
 
                         <h1 className="text-lg font-normal leading-tight">
 

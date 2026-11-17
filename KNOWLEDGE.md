@@ -13,6 +13,7 @@
 - `ProjectsPage.tsx` >= 0bfee7f: combinar modal (onClick) con el diseño remoto (gap-8, skew `group-hover`, imagen hover derecha 40vw). NO volver a quitar esas clases.
 - Cabecera unificada: Title y NavBar usan `fixed` con p-8 / top-0 right-0 pt-8 idéntico en AboutMe y ProjectsPage.
 - Contacto: `NavBar` abre `ContactModal` sobre la página actual; el diálogo se cierra con botón, Escape o clic fuera. En MainPage, `onContactOpenChange` sincroniza la animación del título.
+- Idioma: `LanguageProvider` comparte la selección entre rutas, la guarda en el navegador y utiliza español por defecto; no modifica las URL.
 
 ## Estructura
 - React + react-router-dom
