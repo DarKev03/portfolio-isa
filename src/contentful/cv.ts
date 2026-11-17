@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { Language } from "../types/Language";
-import { ContentfulDataError, getContentfulClient } from "./client";
+import { ContentfulDataError, fetchSingleEntry } from "./client";
+import { readAssetUrl } from "./assets";
 
 const cvSchema = z.object({
     fields: z.object({
@@ -31,30 +32,19 @@ export function parseCv(value: unknown, locale: Language): string {
         throw new ContentfulDataError("El CV publicado no contiene un archivo PDF válido para este idioma.", "The published CV does not contain a valid PDF for this language.");
     }
 
-    const rawUrl = file.data.url;
-    let url: URL;
-    try {
-        url = new URL(rawUrl.startsWith("//") ? `https:${rawUrl}` : rawUrl);
-    } catch {
-        throw new ContentfulDataError("El CV publicado tiene una URL inválida.", "The published CV has an invalid URL.");
-    }
-
-    const allowedHosts = ["assets.ctfassets.net", "assets.eu.ctfassets.net", "downloads.ctfassets.net", "downloads.eu.ctfassets.net"];
-    if (url.protocol !== "https:" || url.username || url.password || url.port || !allowedHosts.includes(url.hostname)) {
-        throw new ContentfulDataError("El CV publicado tiene un origen no permitido.", "The published CV has a disallowed origin.");
-    }
-    return url.href;
+    return readAssetUrl(
+        file.data.url,
+        ["assets.ctfassets.net", "assets.eu.ctfassets.net", "downloads.ctfassets.net", "downloads.eu.ctfassets.net"],
+        new ContentfulDataError("El CV publicado tiene una URL inválida.", "The published CV has an invalid URL."),
+        new ContentfulDataError("El CV publicado tiene un origen no permitido.", "The published CV has a disallowed origin."),
+    );
 }
 
 export async function fetchCv(locale: Language): Promise<string | null> {
-    const response = await getContentfulClient().withAllLocales.getEntries({
-        content_type: "cv",
-        include: 1,
-        limit: 2,
-    });
-    if (response.total === 0) return null;
-    if (response.total !== 1 || response.items.length !== 1) {
-        throw new ContentfulDataError("Debe haber una sola entrada de CV publicada en Contentful.", "There must be exactly one published CV entry in Contentful.");
-    }
-    return parseCv(response.items[0], locale);
+    const entry = await fetchSingleEntry(
+        "cv",
+        1,
+        new ContentfulDataError("Debe haber una sola entrada de CV publicada en Contentful.", "There must be exactly one published CV entry in Contentful."),
+    );
+    return entry === null ? null : parseCv(entry.value, locale);
 }

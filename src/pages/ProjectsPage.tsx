@@ -12,12 +12,11 @@ import { useReducedMotion } from "../components/useReducedMotion";
 const ProjectsPage = () => {
     const text = useTranslation();
     const reducedMotion = useReducedMotion();
-    const backgroundRef = useRef<HTMLDivElement>(null);
     const projectsState = useProjects();
     const projectList = projectsState.projects;
     const castoroFamily = { fontFamily: "'Castoro', serif" };
 
-    const [hoveredProjectId, setHoveredProjectId] = useState<string | number | null>(null);
+    const [hoveredProjectId, setHoveredProjectId] = useState<string | null>(null);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
     const selectedProject = projectList.find(project => project.id === selectedProjectId);
@@ -25,33 +24,11 @@ const ProjectsPage = () => {
 
     const navBarRef = useRef<HTMLDivElement>(null);
 
-    function setPreviousProject() {
+    function selectAdjacentProject(direction: -1 | 1) {
         if (!selectedProject) return;
 
-        const currentIndex = projectList.findIndex(
-            project => project.id === selectedProject.id
-        );
-
-        const previousIndex =
-            currentIndex === 0
-                ? projectList.length - 1
-                : currentIndex - 1;
-
-        setSelectedProjectId(projectList[previousIndex].id);
-    }
-
-    function setNextProject() {
-        if (!selectedProject) return;
-
-        const currentIndex = projectList.findIndex(
-            project => project.id === selectedProject.id
-        );
-
-        const nextIndex =
-            currentIndex === (projectList.length - 1)
-                ? 0
-                : currentIndex + 1
-
+        const currentIndex = projectList.findIndex(project => project.id === selectedProject.id);
+        const nextIndex = (currentIndex + direction + projectList.length) % projectList.length;
         setSelectedProjectId(projectList[nextIndex].id);
     }
 
@@ -66,7 +43,7 @@ const ProjectsPage = () => {
 
 
     return (
-        <div ref={backgroundRef} className="bg-[rgba(255,254,253,1)] min-h-screen flex flex-col">
+        <div className="bg-[rgba(255,254,253,1)] min-h-screen flex flex-col">
 
             <div className="fixed top-0 left-0 z-50 pointer-events-none p-8">
                 <Link to={"/"} className="pointer-events-auto inline-block">
@@ -150,8 +127,8 @@ const ProjectsPage = () => {
                 <ProjectModal
                     project={selectedProject}
                     onClose={() => setSelectedProjectId(null)}
-                    onPrevious={setPreviousProject}
-                    onNext={setNextProject}
+                    onPrevious={() => selectAdjacentProject(-1)}
+                    onNext={() => selectAdjacentProject(1)}
                 />
             )}
 

@@ -4,7 +4,7 @@ import { useTranslation } from "../i18n/translations";
 import type { CmsAbout } from "../types/CmsAbout";
 import type { Language } from "../types/Language";
 import { fetchAbout } from "./about";
-import { ContentfulDataError } from "./client";
+import { getContentfulErrorMessage } from "./client";
 
 type AboutResult =
     | { status: "loading" }
@@ -37,9 +37,7 @@ export function useAbout() {
     if (state.result.status === "error") {
         return {
             status: "error",
-            message: state.result.error instanceof ContentfulDataError
-                ? state.result.error.forLanguage(language)
-                : text.aboutLoadError,
+            message: getContentfulErrorMessage(state.result.error, language, text.aboutLoadError),
         } as const;
     }
     return state.result;

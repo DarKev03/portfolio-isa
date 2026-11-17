@@ -1,29 +1,18 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-
 import gsap from 'gsap';
-
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-import Title from '../components/Title';
-
+import { Link } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import CvDownload from '../components/CvDownload';
+import Title from '../components/Title';
 import { useLanguage } from '../i18n/languageContext';
-import { Link } from 'react-router-dom';
-import { BLOCKS } from '@contentful/rich-text-types';
-import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { useAbout } from '../contentful/useAbout';
-import { readImage } from '../contentful/projects';
 import { useTranslation } from '../i18n/translations';
 import { useReducedMotion } from '../components/useReducedMotion';
-import ContentImage from '../components/ContentImage';
-
-
+import RichTextContent from '../components/RichTextContent';
 gsap.registerPlugin(ScrollTrigger);
 
-
 const AboutMe = () => {
-
     const { language } = useLanguage();
     const text = useTranslation();
     const reducedMotion = useReducedMotion();
@@ -35,17 +24,12 @@ const AboutMe = () => {
     const usesFlowLayout = reducedMotion || needsFlowLayout;
     const longContentWidth = firstPhoto ? 'max-w-[calc(100%-min(168px,30vw)-32px)]' : 'max-w-full';
     const sectionRef = useRef<HTMLDivElement>(null);
-
     const img2Ref = useRef<HTMLImageElement>(null);
-
     const navBarRef = useRef<HTMLDivElement>(null);
     const imageContainerRef = useRef<HTMLDivElement>(null);
-
     const titleRef = useRef<HTMLDivElement>(null);
     const titleContentRef = useRef<HTMLDivElement>(null);
-
     const parentesisRef = useRef<HTMLDivElement>(null);
-
     const bioRef = useRef<HTMLDivElement>(null);
     const cvRef = useRef<HTMLDivElement>(null);
     const footerRef = useRef<HTMLDivElement>(null);
@@ -84,14 +68,18 @@ const AboutMe = () => {
         };
     }, []);
 
-
     useEffect(() => {
-
         const ctx = gsap.context(() => {
             const navBar = navBarRef.current;
             const imageContainer = imageContainerRef.current;
+            const title = titleRef.current;
+            const titleContent = titleContentRef.current;
+            const bio = bioRef.current;
+            const cv = cvRef.current;
+            const footer = footerRef.current;
+            const parentesis = parentesisRef.current;
 
-            if (!navBar || !imageContainer) return;
+            if (!navBar || !imageContainer || !title || !titleContent || !bio || !cv || !footer || !parentesis) return;
 
             if (reducedMotion) {
                 const positionPhoto = () => gsap.set(imageContainer, {
@@ -103,9 +91,7 @@ const AboutMe = () => {
                 return () => window.removeEventListener('resize', positionPhoto);
             }
 
-            gsap.set(imageContainer, {
-                opacity: 1,
-            });
+            gsap.set(imageContainer, { opacity: 1 });
 
             const photoTimeline = gsap.timeline({
                 defaults: { ease: 'none' },
@@ -128,216 +114,74 @@ const AboutMe = () => {
                 photoTimeline.to(img2Ref.current, { opacity: 1 }, 0);
             }
 
-
-            /*
-             * Navbar desaparece con el scroll.
-             */
-            gsap.to(navBarRef.current, {
-
-                opacity: 0,
-
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top top',
-                    end: '+=300',
-                    scrub: true,
-                },
-
-            });
-
-
-            /*
-             * Title desaparece con el scroll.
-             */
-            gsap.to(titleRef.current, {
-
-                opacity: 0,
-
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top top',
-                    end: '+=300',
-                    scrub: true,
-                },
-
-            });
-
-
-            /*
-             * Paréntesis aparecen con el scroll.
-             */
-            gsap.to(parentesisRef.current, {
-
-                opacity: 1,
-
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top top',
-                    end: '+=300',
-                    scrub: true,
-                },
-
-            });
-
+            const scrollTrigger = {
+                trigger: sectionRef.current,
+                start: 'top top',
+                end: '+=300',
+                scrub: true,
+            };
+            gsap.to([navBar, title], { opacity: 0, scrollTrigger: { ...scrollTrigger } });
+            gsap.to(parentesis, { opacity: 1, scrollTrigger: { ...scrollTrigger } });
 
             if (!usesFlowLayout) {
-                /*
-                 * Bio.
-                 */
-                gsap.to(bioRef.current, {
-
+                gsap.to(bio, {
                     y: () => {
-
-                        const titleRect =
-                            titleContentRef.current!.getBoundingClientRect();
-
-                        const bioRect =
-                            bioRef.current!.getBoundingClientRect();
-
+                        const titleRect = titleContent.getBoundingClientRect();
+                        const bioRect = bio.getBoundingClientRect();
                         return titleRect.bottom - bioRect.top;
                     },
-
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: 'top top',
-                        end: '+=300',
-                        scrub: true,
-                        invalidateOnRefresh: true,
-                    },
-
+                    scrollTrigger: { ...scrollTrigger, invalidateOnRefresh: true },
                 });
-
-
-                /*
-                 * Footer.
-                 */
-                gsap.to(footerRef.current, {
-
+                gsap.to(footer, {
                     opacity: 1,
-
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: 'top top',
-                        end: '+=300',
-                        scrub: true,
-                        invalidateOnRefresh: true,
-                    },
-
+                    scrollTrigger: { ...scrollTrigger, invalidateOnRefresh: true },
                 });
-
-
-                /*
-                 * CV.
-                 */
-                gsap.to(cvRef.current, {
-
+                gsap.to(cv, {
                     opacity: 1,
-
                     y: () => {
-
-                        const bioRect =
-                            bioRef.current!.getBoundingClientRect();
-
-                        const cvRect =
-                            cvRef.current!.getBoundingClientRect();
-
-                        const titleRect =
-                            titleContentRef.current!.getBoundingClientRect();
-
-                        return (
-                            (titleRect.bottom - bioRect.top) +
-                            (bioRect.bottom - cvRect.top)
-                        );
+                        const bioRect = bio.getBoundingClientRect();
+                        const cvRect = cv.getBoundingClientRect();
+                        const titleRect = titleContent.getBoundingClientRect();
+                        return (titleRect.bottom - bioRect.top) + (bioRect.bottom - cvRect.top);
                     },
-
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: 'top top',
-                        end: '+=300',
-                        scrub: true,
-                        invalidateOnRefresh: true,
-                    },
-
+                    scrollTrigger: { ...scrollTrigger, invalidateOnRefresh: true },
                 });
             }
-
         }, sectionRef);
-
 
         ScrollTrigger.refresh();
         return () => ctx.revert();
-
     }, [aboutContent, aboutState.status, usesFlowLayout, reducedMotion]);
 
-
     useEffect(() => {
-
         const root = document.documentElement;
-
         root.classList.add('no-scrollbar');
-
         return () => root.classList.remove('no-scrollbar');
-
     }, []);
 
-
     return (
-
         <div className={`${reducedMotion ? 'min-h-screen' : usesFlowLayout ? 'min-h-[150vh]' : 'h-[150vh]'} bg-[#fffefd] no-scrollbar`}>
-
             <div
                 ref={sectionRef}
                 className={`${usesFlowLayout ? `relative flex ${reducedMotion ? 'min-h-screen' : 'min-h-[150vh]'} w-full flex-col` : 'sticky top-0 h-screen w-screen overflow-hidden'} text-[#414141]`}
             >
-
-                {/* TITLE */}
-
-                <div
-                    ref={titleRef}
-                    className="about-header fixed inset-0 z-50 pointer-events-none p-8"
-                >
-
+                <div ref={titleRef} className="about-header fixed inset-0 z-50 pointer-events-none p-8">
                     <div ref={titleContentRef}>
-                        <Link to={"/"} className="pointer-events-auto inline-block">
+                        <Link to="/" className="pointer-events-auto inline-block">
                             <Title />
                         </Link>
                     </div>
-
                 </div>
 
-
-                {/* PARÉNTESIS */}
-
-                <div
-                    ref={parentesisRef}
-                    className="fixed inset-0 z-50 pointer-events-none p-8 opacity-0"
-                >
-
-                    <h1
-                        className="text-lg italic font-normal"
-                        style={{
-                            fontFamily: 'Castoro, sans-serif'
-                        }}
-                    >
+                <div ref={parentesisRef} className="fixed inset-0 z-50 pointer-events-none p-8 opacity-0">
+                    <h1 className="text-lg italic font-normal" style={{ fontFamily: 'Castoro, sans-serif' }}>
                         ()
                     </h1>
-
                 </div>
 
-
-                {/* NAVBAR */}
-
-                <div
-                    ref={navBarRef}
-                    className="about-header fixed top-0 right-0 z-50 p-8"
-                >
-
+                <div ref={navBarRef} className="about-header fixed top-0 right-0 z-50 p-8">
                     <NavBar />
-
                 </div>
-
-
-                {/* FOTOS */}
 
                 <div
                     ref={imageContainerRef}
@@ -347,37 +191,19 @@ const AboutMe = () => {
                         {firstPhoto && <img src={firstPhoto.url} alt={firstPhoto.alt} onError={() => setHasPhotoError(true)} className="h-full w-full object-cover" />}
                         {secondPhoto && <img ref={img2Ref} src={secondPhoto.url} alt={secondPhoto.alt} onError={() => setHasPhotoError(true)} className="absolute inset-0 h-full w-full object-cover opacity-0" />}
                     </div>
-
                 </div>
-
-
-                {/* BIO */}
 
                 <div
                     ref={bioRef}
                     className={`${usesFlowLayout ? `relative pt-64 sm:pt-24 ${longContentWidth} [overflow-wrap:anywhere]` : 'absolute bottom-0 left-0'} z-50 w-140 p-8 text-lg leading-tight`}
-                    style={{
-                        fontFamily: 'Castoro, sans-serif'
-                    }}
+                    style={{ fontFamily: 'Castoro, sans-serif' }}
                 >
-
                     {aboutState.status === 'loading' && <p role="status">{text.loadingAbout}</p>}
                     {aboutState.status === 'unavailable' && <p role="status">{text.unavailableAbout}</p>}
                     {aboutState.status === 'error' && <p role="alert">{aboutState.message}</p>}
                     {hasPhotoError && <p role="alert">{text.imageLoadError}</p>}
-                    {aboutContent && documentToReactComponents(aboutContent.richContent, {
-                        renderNode: {
-                            [BLOCKS.EMBEDDED_ASSET]: node => {
-                                const image = readImage(node.data.target, 'Isabel Faubel', language);
-                                return <ContentImage key={image.url} src={image.url} alt={image.alt} />;
-                            },
-                        },
-                    })}
-
+                    {aboutContent && <RichTextContent document={aboutContent.richContent} fallbackAlt="Isabel Faubel" language={language} />}
                 </div>
-
-
-                {/* CV */}
 
                 <div
                     ref={cvRef}
@@ -388,60 +214,32 @@ const AboutMe = () => {
                             ScrollTrigger.update();
                         }
                     }}
-                    style={{
-                        fontFamily: 'Castoro, sans-serif'
-                    }}
+                    style={{ fontFamily: 'Castoro, sans-serif' }}
                 >
-
                     <div>
-
                         <CvDownload key={language} language={language} />
-
                     </div>
-
                 </div>
-
-
-                {/* FOOTER */}
 
                 <div
                     ref={footerRef}
                     className={`${usesFlowLayout ? `relative flex-wrap ${longContentWidth} [overflow-wrap:anywhere]` : 'absolute bottom-0 left-0 opacity-0'} z-50 w-140 p-8 flex flex-row gap-8 text-md italic leading-tight align-baseline text-[#4C4C4C]`}
-                    style={{
-                        fontFamily: 'Castoro, sans-serif'
-                    }}
+                    style={{ fontFamily: 'Castoro, sans-serif' }}
                 >
-
                     <p>
-
-                        LinkedIn <br></br>
-
-                        Instagram <br></br>
-
+                        LinkedIn <br />
+                        Instagram <br />
                         (i.fuabel.minguez@gmail.es)
-
                     </p>
-
-
                     <p className="not-italic">
-
-                        <br></br>
-
-                        <br></br>
-
+                        <br />
+                        <br />
                         by Isabel Faubel ©2026
-
                     </p>
-
                 </div>
-
             </div>
-
         </div>
-
     );
-
 };
-
 
 export default AboutMe;

@@ -10,7 +10,6 @@ interface ProjectPreviewProps {
 
 const ProjectPreview = ({ project }: ProjectPreviewProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const imageRef = useRef<HTMLImageElement>(null);
     const reducedMotion = useReducedMotion();
 
     useLayoutEffect(() => {
@@ -39,7 +38,6 @@ const ProjectPreview = ({ project }: ProjectPreviewProps) => {
             className="absolute right-0 bottom-0 pr-14 w-[40vw] aspect-video pointer-events-none overflow-hidden"
         >
             <ContentImage
-                ref={imageRef}
                 src={project.image}
                 alt={"imageAlt" in project ? project.imageAlt : project.title}
                 className="w-full h-full object-cover"

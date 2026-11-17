@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ContentfulDataError, getContentfulClient } from "./client";
-import { readImage } from "./projects";
+import { ContentfulDataError, fetchSingleEntry } from "./client";
+import { readAssetUrl, readImage } from "./assets";
 
 export interface GalleryMedia {
     type: "image" | "video";
@@ -44,32 +44,26 @@ export function parseGallery(value: unknown): GalleryMedia[] {
             return { type: "image", url: readImage(media, "Galería", "es").url };
         }
 
-        let url: URL;
-        try {
-            url = new URL(file.url.startsWith("//") ? `https:${file.url}` : file.url);
-        } catch {
-            throw new ContentfulDataError("Un vídeo de la galería tiene una URL inválida.", "A gallery video has an invalid URL.");
-        }
-        const allowedHosts = ["videos.ctfassets.net", "videos.eu.ctfassets.net", "assets.ctfassets.net", "assets.eu.ctfassets.net"];
-        if (url.protocol !== "https:" || url.username || url.password || url.port || !allowedHosts.includes(url.hostname)) {
-            throw new ContentfulDataError("Un vídeo de la galería tiene un origen no permitido.", "A gallery video has a disallowed origin.");
-        }
-        return { type: "video", url: url.href };
+        return {
+            type: "video",
+            url: readAssetUrl(
+                file.url,
+                ["videos.ctfassets.net", "videos.eu.ctfassets.net", "assets.ctfassets.net", "assets.eu.ctfassets.net"],
+                new ContentfulDataError("Un vídeo de la galería tiene una URL inválida.", "A gallery video has an invalid URL."),
+                new ContentfulDataError("Un vídeo de la galería tiene un origen no permitido.", "A gallery video has a disallowed origin."),
+            ),
+        };
     });
 }
 
 export async function fetchGallery(): Promise<GalleryMedia[] | null> {
-    const response = await getContentfulClient().withAllLocales.getEntries({
-        content_type: "galeriaInicio",
-        include: 1,
-        limit: 2,
-    });
-    if (response.total === 0) return null;
-    if (response.total !== 1 || response.items.length !== 1) {
-        throw new ContentfulDataError(
+    const entry = await fetchSingleEntry(
+        "galeriaInicio",
+        1,
+        new ContentfulDataError(
             "Debe haber una sola entrada de la galería publicada en Contentful.",
             "There must be exactly one published gallery entry in Contentful.",
-        );
-    }
-    return parseGallery(response.items[0]);
+        ),
+    );
+    return entry === null ? null : parseGallery(entry.value);
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ContentfulDataError } from "../contentful/client";
+import { getContentfulErrorMessage } from "../contentful/client";
 import { fetchCv } from "../contentful/cv";
 import type { Language } from "../types/Language";
 import { useTranslation } from "../i18n/translations";
@@ -89,7 +89,7 @@ const CvDownload = ({ language }: CvDownloadProps) => {
             </button>
             {state.status === "loading" && <p role="status" className="text-sm">{text.loadingCv}</p>}
             {state.status === "unavailable" && <p role="status" className="text-sm">{text.unavailableCv}</p>}
-            {state.status === "error" && <p role="alert" className="text-sm">{state.error instanceof ContentfulDataError ? state.error.forLanguage(language) : text.cvLoadError}</p>}
+            {state.status === "error" && <p role="alert" className="text-sm">{getContentfulErrorMessage(state.error, language, text.cvLoadError)}</p>}
             {downloadError && <p role="alert" className="text-sm">{downloadError}</p>}
         </div>
     );

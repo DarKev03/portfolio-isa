@@ -5,6 +5,8 @@
 - `NavBar.tsx` — navegación con Links + LanguageSelector
 - `ProjectModal.tsx` — overlay de proyecto al hacer click
 - `ProjectDetail.tsx` — contenido del modal
+- `ProjectContentBlock.tsx` — presentación compartida de los bloques de proyecto anteriores a Contentful.
+- `RichTextContent.tsx` — presentación compartida del texto enriquecido y sus imágenes.
 - `PageErrorBoundary.tsx` — reintento automático único por ruta ante errores de renderizado; si vuelve a fallar, ofrece volver al inicio. Los errores de carga asíncrona se gestionan por separado.
 
 ## Anotaciones
@@ -17,6 +19,7 @@
 - Idioma: `LanguageProvider` comparte la selección entre rutas, la guarda en el navegador y utiliza español por defecto; no modifica las URL.
 - Movimiento reducido: se respeta la preferencia del sistema; se omiten las transiciones y el desplazamiento animado, la galería comienza con los vídeos pausados y Sobre mí usa una composición estática desplazable.
 - Proyectos de Contentful: se solicitan todos los locales y se seleccionan los textos del idioma activo; los campos compartidos y archivos multimedia pueden usar `es`, sin sustituir traducciones de texto ausentes.
+- Contentful: `assets.ts` valida URLs e imágenes compartidas; `richText.ts` valida documentos enriquecidos independientemente del tipo de entrada.
 - Listado de proyectos: muestra hasta las dos primeras categorías del idioma activo debajo del título, separadas por `/`; son opcionales.
 - Detalle de proyectos: se abre como diálogo sobre `/projects` sin cambiar la URL; las rutas antiguas con ID redirigen al listado.
 - Texto de proyectos: cada separador horizontal de Contentful delimita un panel de hasta media pantalla; texto e imágenes entre separadores conservan su orden y se reescalan juntos para caber sin scroll vertical. El ancho del panel se ajusta al contenido reescalado. El carrusel admite arrastre, rueda horizontal y flechas izquierda/derecha.

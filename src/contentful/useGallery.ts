@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "../i18n/languageContext";
 import { useTranslation } from "../i18n/translations";
-import { ContentfulDataError } from "./client";
+import { getContentfulErrorMessage } from "./client";
 import { fetchGallery, type GalleryMedia } from "./gallery";
 
 type GalleryResult =
@@ -31,9 +31,7 @@ export function useGallery() {
     if (result.status === "error") {
         return {
             status: "error",
-            message: result.error instanceof ContentfulDataError
-                ? result.error.forLanguage(language)
-                : text.galleryLoadError,
+            message: getContentfulErrorMessage(result.error, language, text.galleryLoadError),
         } as const;
     }
     return result;

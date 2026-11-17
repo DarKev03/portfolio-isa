@@ -1,15 +1,13 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
-import { BLOCKS } from "@contentful/rich-text-types";
-import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import type { DisplayProject } from "../types/CmsProject";
-import { ContentBlock } from "../types/ContentBlock";
-import { readImage, splitProjectContent } from "../contentful/projects";
+import { splitProjectContent } from "../contentful/projects";
 import { useTranslation } from "../i18n/translations";
 import { useLanguage } from "../i18n/languageContext";
 import { useLayoutEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { useReducedMotion } from "./useReducedMotion";
-import ContentImage from "./ContentImage";
+import RichTextContent from "./RichTextContent";
+import ProjectContentBlock from "./ProjectContentBlock";
 
 const ProjectSection = ({ children }: { children: ReactNode }) => {
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -69,7 +67,6 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
     const text = useTranslation();
     const { language } = useLanguage();
     const reducedMotion = useReducedMotion();
-    const castoroFamily = { fontFamily: "'Castoro', serif" };
 
     const [emblaRef, emblaApi] = useEmblaCarousel({
         dragFree: !reducedMotion,
@@ -98,92 +95,6 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                 event.preventDefault();
                 emblaApi.scrollTo(0, reducedMotion);
             }
-        }
-    };
-
-    const renderBlock = (
-        block: ContentBlock,
-        index: number,
-        total: number
-    ) => {
-        const isFirst = index === 0;
-        const isLast = index === total - 1;
-
-        const blockBaseClass = `
-            flex-none w-1/2 h-full flex flex-col justify-start py-10
-            ${isFirst
-                ? "pl-11 pr-6"
-                : isLast
-                    ? "pl-6 pr-11"
-                    : "px-6"
-            }
-        `;
-
-        switch (block.type) {
-            case "text-image":
-                return (
-                    <div key={index} className={blockBaseClass}>
-                        <div
-                            className="text-xl leading-relaxed text-gray-700 mb-8"
-                            style={castoroFamily}
-                        >
-                            {block.text}
-                        </div>
-
-                        <div
-                            style={{ height: `${block.imageSize}%` }}
-                            className="overflow-hidden mt-auto"
-                        >
-                            <ContentImage
-                                src={block.image}
-                                alt=""
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                    </div>
-                );
-
-            case "image-text":
-                return (
-                    <div
-                        key={index}
-                        className={blockBaseClass + " mb-auto"}
-                    >
-                        <div
-                            style={{ height: `${block.imageSize}%` }}
-                            className="overflow-hidden"
-                        >
-                            <ContentImage
-                                src={block.image}
-                                alt=""
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-
-                        <div
-                            className="text-xl leading-relaxed text-gray-700 pt-5"
-                            style={castoroFamily}
-                        >
-                            {block.text}
-                        </div>
-                    </div>
-                );
-
-            case "image-full":
-                return (
-                    <div key={index} className={blockBaseClass}>
-                        <div className="w-full h-full overflow-hidden">
-                            <ContentImage
-                                src={block.image}
-                                alt=""
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                    </div>
-                );
-
-            default:
-                return null;
         }
     };
 
@@ -238,20 +149,12 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
                     {"richContent" in project
                         ? splitProjectContent(project.richContent).map((section, index) => (
                             <ProjectSection key={index}>
-                                {documentToReactComponents(
-                                    section,
-                                    { renderNode: {
-                                        [BLOCKS.EMBEDDED_ASSET]: node => {
-                                            const image = readImage(node.data.target, project.title, language);
-                                            return <ContentImage key={image.url} src={image.url} alt={image.alt} className="w-full h-auto object-contain" />;
-                                        },
-                                    } },
-                                )}
+                                <RichTextContent document={section} fallbackAlt={project.title} language={language} imageClassName="w-full h-auto object-contain" />
                             </ProjectSection>
                         ))
-                        : project.content?.map((block, index) =>
-                            renderBlock(block, index, project.content?.length || 0)
-                        )}
+                        : project.content?.map((block, index, blocks) => (
+                            <ProjectContentBlock key={index} block={block} index={index} total={blocks.length} reportImageErrors />
+                        ))}
 
                 </div>
             </div>

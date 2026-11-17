@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CmsProject } from "../types/CmsProject";
-import { ContentfulDataError } from "./client";
+import { getContentfulErrorMessage } from "./client";
 import { fetchProjects } from "./projects";
 import { useLanguage } from "../i18n/languageContext";
 import { useTranslation } from "../i18n/translations";
@@ -46,9 +46,7 @@ export function useProjects(): ProjectsState {
         return {
             status: "error",
             projects: [],
-            message: result.error instanceof ContentfulDataError
-                ? result.error.forLanguage(language)
-                : text.projectLoadError,
+            message: getContentfulErrorMessage(result.error, language, text.projectLoadError),
         };
     }
     return result;

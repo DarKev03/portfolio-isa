@@ -1,8 +1,9 @@
 import { z } from "zod";
 import type { CmsAbout } from "../types/CmsAbout";
 import type { Language } from "../types/Language";
-import { ContentfulDataError, getContentfulClient } from "./client";
-import { parseRichText, readImage } from "./projects";
+import { ContentfulDataError, fetchSingleEntry } from "./client";
+import { readImage } from "./assets";
+import { parseRichText } from "./richText";
 
 const aboutSchema = z.object({
     fields: z.object({
@@ -51,14 +52,10 @@ export function parseAbout(value: unknown, locale: Language): CmsAbout {
 }
 
 export async function fetchAbout(locale: Language): Promise<CmsAbout | null> {
-    const response = await getContentfulClient().withAllLocales.getEntries({
-        content_type: "sobreMi",
-        include: 4,
-        limit: 2,
-    });
-    if (response.total === 0) return null;
-    if (response.total !== 1 || response.items.length !== 1) {
-        throw new ContentfulDataError("Debe haber una sola entrada de «Sobre mí» publicada en Contentful.", "There must be exactly one published About me entry in Contentful.");
-    }
-    return parseAbout(response.items[0], locale);
+    const entry = await fetchSingleEntry(
+        "sobreMi",
+        4,
+        new ContentfulDataError("Debe haber una sola entrada de «Sobre mí» publicada en Contentful.", "There must be exactly one published About me entry in Contentful."),
+    );
+    return entry === null ? null : parseAbout(entry.value, locale);
 }

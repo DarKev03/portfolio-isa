@@ -1,13 +1,18 @@
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer, resolveConfig } from 'vite';
 
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 after(() => server.close());
-const { parseProject, parseLocalizedProject, readImage, splitProjectContent } = await server.ssrLoadModule('/src/contentful/projects.ts');
+const { parseProject, parseLocalizedProject, splitProjectContent } = await server.ssrLoadModule('/src/contentful/projects.ts');
+const { readImage } = await server.ssrLoadModule('/src/contentful/assets.ts');
 const { parseCv } = await server.ssrLoadModule('/src/contentful/cv.ts');
 const { parseAbout } = await server.ssrLoadModule('/src/contentful/about.ts');
 const { parseGallery } = await server.ssrLoadModule('/src/contentful/gallery.ts');
+const { default: ProjectContentBlock } = await server.ssrLoadModule('/src/components/ProjectContentBlock.tsx');
+const { LanguageContext } = await server.ssrLoadModule('/src/i18n/languageContext.ts');
 
 test('configura Contentful aunque el antiguo interruptor esté desactivado', async () => {
   const keys = ['CONTENTFUL_ENABLED', 'CONTENTFUL_SPACE_ID', 'CONTENTFUL_PUBLIC_TOKEN', 'CONTENTFUL_PREVIEW_TOKEN', 'CONTENTFUL_REGION'];
@@ -160,6 +165,24 @@ test('rechaza galerías vacías, archivos sin resolver, tipos y orígenes no per
   assert.throws(() => parseGallery(video), /origen no permitido/);
 });
 
+test('rechaza URLs multimedia mal formadas o con credenciales, puertos y protocolos no permitidos', () => {
+  const image = entry();
+  for (const url of ['http://images.ctfassets.net/image.jpg', 'https://user@images.ctfassets.net/image.jpg', 'https://images.ctfassets.net:444/image.jpg']) {
+    image.fields.portada.fields.file.url = url;
+    assert.throws(() => parseProject(image), /origen no permitido/);
+  }
+  image.fields.portada.fields.file.url = 'not a URL';
+  assert.throws(() => parseProject(image), /URL inválida/);
+
+  const cv = cvEntry();
+  cv.fields.cv.es.fields.file.es.url = 'https://user@assets.ctfassets.net/cv.pdf';
+  assert.throws(() => parseCv(cv, 'es'), /origen no permitido/);
+
+  const gallery = galleryEntry();
+  gallery.fields.fotosGalera.es[1].fields.file.es.url = 'https://videos.ctfassets.net:444/video.mp4';
+  assert.throws(() => parseGallery(gallery), /origen no permitido/);
+});
+
 function entry() {
   const asset = {
     fields: {
@@ -204,6 +227,28 @@ test('agrupa texto e imágenes en orden y separa secciones solo con líneas hori
   assert.deepEqual(document.content, [separator, text, image, text, separator, separator, image, text, separator]);
   assert.deepEqual(splitProjectContent({ ...document, content: [text, image] }).map(section => section.content), [[text, image]]);
   assert.deepEqual(splitProjectContent({ ...document, content: [separator] }), []);
+});
+
+test('mantiene el orden y las variantes de los bloques de proyecto compartidos', () => {
+  const render = (type, reportImageErrors) => renderToStaticMarkup(createElement(
+    LanguageContext.Provider,
+    { value: { language: 'es', setLanguage() {} } },
+    createElement(ProjectContentBlock, {
+      block: { type, text: 'Descripción', image: '/imagen.jpg', imageSize: '40' },
+      index: 0,
+      total: 1,
+      reportImageErrors,
+    }),
+  ));
+
+  for (const reportImageErrors of [false, true]) {
+    const textFirst = render('text-image', reportImageErrors);
+    const imageFirst = render('image-text', reportImageErrors);
+    assert.ok(textFirst.indexOf('Descripción') < textFirst.indexOf('<img'));
+    assert.ok(imageFirst.indexOf('<img') < imageFirst.indexOf('Descripción'));
+    assert.match(textFirst, /height:40%/);
+    assert.match(render('image-full', reportImageErrors), /<img[^>]+src="\/imagen.jpg"/);
+  }
 });
 
 function localizedEntry() {

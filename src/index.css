@@ -17,11 +17,6 @@
     display: none;
 }
 
-.infinite-canvas-root,
-.infinite-canvas-root * {
-    cursor: default !important;
-}
-
 .about-header:focus-within {
     opacity: 1 !important;
 }
