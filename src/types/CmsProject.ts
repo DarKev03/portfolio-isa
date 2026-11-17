@@ -7,7 +7,7 @@ export interface CmsProject {
     tags: string[];
     image: string;
     imageAlt: string;
-    year: number;
+    year?: number;
     richContent: Document;
 }
 

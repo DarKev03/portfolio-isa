@@ -67,7 +67,22 @@ test('admite contenido válido, conserva el año y extrae imágenes', () => {
 test('rechaza campos obligatorios incompletos', () => {
   const invalid = entry();
   invalid.fields.titulo = '';
-  assert.throws(() => parseProject(invalid), /campos incompletos o inválidos/);
+  assert.throws(() => parseProject(invalid), /campos incompletos o inválidos: fields\.titulo/);
+});
+
+test('admite categorías y fecha opcionales sin ocultar valores inválidos', () => {
+  const project = entry();
+  delete project.fields.categorias;
+  delete project.fields.fechaPublicacin;
+  const parsed = parseProject(project);
+  assert.deepEqual(parsed.tags, []);
+  assert.equal(parsed.year, undefined);
+
+  project.fields.categorias = [''];
+  assert.throws(() => parseProject(project), /fields\.categorias/);
+  project.fields.categorias = [];
+  project.fields.fechaPublicacin = 'fecha inválida';
+  assert.throws(() => parseProject(project), /fields\.fechaPublicacin/);
 });
 
 test('rechaza imágenes sin resolver o con origen no permitido', () => {

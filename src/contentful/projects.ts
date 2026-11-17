@@ -104,15 +104,18 @@ const entrySchema = z.object({
     fields: z.object({
         titulo: z.string().trim().min(1),
         portada: z.unknown(),
-        categorias: z.array(z.string().trim().min(1)),
+        categorias: z.array(z.string().trim().min(1)).optional(),
         textoProyecto: z.unknown(),
-        fechaPublicacin: z.union([z.iso.date(), z.iso.datetime({ offset: true })]),
+        fechaPublicacin: z.union([z.iso.date(), z.iso.datetime({ offset: true })]).optional(),
     }),
 });
 
 export function parseProject(value: unknown): CmsProject {
     const result = entrySchema.safeParse(value);
-    if (!result.success) throw new ContentfulDataError("Un proyecto publicado tiene campos incompletos o inválidos.");
+    if (!result.success) {
+        const fields = [...new Set(result.error.issues.map(issue => issue.path.slice(0, 2).join(".")))];
+        throw new ContentfulDataError(`Un proyecto publicado tiene campos incompletos o inválidos: ${fields.join(", ")}.`);
+    }
 
     const { sys, fields } = result.data;
     const image = readImage(fields.portada, fields.titulo);
@@ -124,10 +127,10 @@ export function parseProject(value: unknown): CmsProject {
     return {
         id: sys.id,
         title: fields.titulo,
-        tags: fields.categorias,
+        tags: fields.categorias ?? [],
         image: image.url,
         imageAlt: image.alt,
-        year: Number(fields.fechaPublicacin.slice(0, 4)),
+        year: fields.fechaPublicacin ? Number(fields.fechaPublicacin.slice(0, 4)) : undefined,
         richContent: fields.textoProyecto,
     };
 }
