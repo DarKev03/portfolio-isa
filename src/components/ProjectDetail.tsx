@@ -10,15 +10,23 @@ import { useLanguage } from "../i18n/languageContext";
 import { useLayoutEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 
 const ProjectSection = ({ children }: { children: ReactNode }) => {
+    const sectionRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
 
     useLayoutEffect(() => {
+        const section = sectionRef.current;
         const viewport = viewportRef.current;
         const content = contentRef.current;
-        if (!viewport || !content) return;
+        const container = section?.parentElement;
+        if (!section || !viewport || !content || !container) return;
 
         const updateScale = () => {
+            const style = getComputedStyle(section);
+            const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+            const maxWidth = container.clientWidth / 2;
+            // Measure at the maximum width so the scaled section does not rewrap itself.
+            viewport.style.width = `${Math.max(0, maxWidth - padding)}px`;
             if (!viewport.clientWidth || !viewport.clientHeight || !content.scrollWidth || !content.scrollHeight) return;
             const scale = Math.min(
                 1,
@@ -26,9 +34,11 @@ const ProjectSection = ({ children }: { children: ReactNode }) => {
                 viewport.clientHeight / content.scrollHeight,
             );
             content.style.transform = `scale(${scale})`;
+            section.style.width = `${Math.min(maxWidth, padding + (maxWidth - padding) * scale)}px`;
         };
 
         const observer = new ResizeObserver(updateScale);
+        observer.observe(container);
         observer.observe(viewport);
         observer.observe(content);
         updateScale();
@@ -36,7 +46,7 @@ const ProjectSection = ({ children }: { children: ReactNode }) => {
     }, []);
 
     return (
-        <div tabIndex={0} className="flex-none w-1/2 h-full px-4 py-10 text-[clamp(0.875rem,1.111vw,1.25rem)] sm:px-6" style={{ fontFamily: "'Castoro', serif" }}>
+        <div ref={sectionRef} tabIndex={0} className="flex-none w-1/2 h-full overflow-clip px-4 py-10 text-[clamp(0.875rem,1.111vw,1.25rem)] sm:px-6" style={{ fontFamily: "'Castoro', serif" }}>
             <div ref={viewportRef} className="h-full overflow-clip">
                 <div ref={contentRef} className="origin-top-left space-y-4 break-words [&_table]:w-full [&_table]:table-fixed">
                     {children}
