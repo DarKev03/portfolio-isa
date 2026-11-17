@@ -16,7 +16,7 @@
 - Idioma: `LanguageProvider` comparte la selección entre rutas, la guarda en el navegador y utiliza español por defecto; no modifica las URL.
 - Proyectos de Contentful: se solicitan todos los locales y se seleccionan los textos del idioma activo; los campos compartidos y archivos multimedia pueden usar `es`, sin sustituir traducciones de texto ausentes.
 - Detalle de proyectos: se abre como diálogo sobre `/projects` sin cambiar la URL; las rutas antiguas con ID redirigen al listado.
-- Texto de proyectos: cada separador horizontal de Contentful delimita un panel; texto e imágenes entre separadores conservan su orden.
+- Texto de proyectos: cada separador horizontal de Contentful delimita un panel de media pantalla; texto e imágenes entre separadores conservan su orden y se adaptan al espacio.
 - Sobre mí: una entrada `sobreMi` aporta el texto localizado (biografía, formación y experiencia) y hasta dos fotos compartidas, que transicionan en un mismo marco desde debajo del menú hasta la parte inferior al bajar; el CV se gestiona por separado. Cuando el contenido no cabe en la pantalla, la página crece y permite recorrerlo completo.
 
 ## Estructura

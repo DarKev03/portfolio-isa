@@ -79,7 +79,7 @@ const ProjectModal = ({
         >
             <div
                 ref={overlayRef}
-                className="w-screen h-screen max-w-400 bg-transparent"
+                className="w-screen h-screen bg-transparent"
             >
                 <ProjectDetail
                     project={project}

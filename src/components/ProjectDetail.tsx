@@ -148,7 +148,7 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
 
             {/* Contenido */}
             <div
-                className="flex-1 overflow-hidden p-8 pr-0"
+                className="flex-1 overflow-hidden py-8"
                 ref={emblaRef}
             >
                 <div className="flex h-full">
@@ -157,7 +157,7 @@ const ProjectDetail = ({ project, onClose, onPrevious, onNext }: ProjectDetailPr
 
                     {"richContent" in project
                         ? splitProjectContent(project.richContent).map((section, index) => (
-                            <div key={index} tabIndex={0} className="flex-none w-1/2 h-full overflow-y-auto px-6 py-10" style={castoroFamily}>
+                            <div key={index} tabIndex={0} className="flex-none w-1/2 h-full overflow-y-auto px-4 py-10 text-[clamp(0.875rem,1.111vw,1.25rem)] sm:px-6" style={castoroFamily}>
                                 <div className="space-y-4 break-words [&_table]:w-full [&_table]:table-fixed">
                                     {documentToReactComponents(
                                         section,
