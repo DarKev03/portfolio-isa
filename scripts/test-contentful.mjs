@@ -6,6 +6,7 @@ const server = await createServer({ server: { middlewareMode: true }, appType: '
 after(() => server.close());
 const { parseProject, parseLocalizedProject, getContentImages } = await server.ssrLoadModule('/src/contentful/projects.ts');
 const { parseCv } = await server.ssrLoadModule('/src/contentful/cv.ts');
+const { parseAbout } = await server.ssrLoadModule('/src/contentful/about.ts');
 
 test('configura Contentful aunque el antiguo interruptor esté desactivado', async () => {
   const keys = ['CONTENTFUL_ENABLED', 'CONTENTFUL_SPACE_ID', 'CONTENTFUL_PUBLIC_TOKEN', 'CONTENTFUL_PREVIEW_TOKEN', 'CONTENTFUL_REGION'];
@@ -65,6 +66,57 @@ test('valida solo el archivo seleccionado de un recurso localizado', () => {
   assert.equal(parseCv(cv, 'es'), 'https://assets.ctfassets.net/space/espanol.pdf');
   cv.fields.cv.en = cv.fields.cv.es;
   assert.throws(() => parseCv(cv, 'en'), /PDF válido/);
+});
+
+function aboutEntry() {
+  const photo = name => ({
+    fields: {
+      title: { es: `Foto ${name}`, en: `Photo ${name}` },
+      file: { es: { url: `//images.ctfassets.net/space/${name}.jpg`, contentType: 'image/jpeg' } },
+    },
+  });
+  const document = text => ({
+    nodeType: 'document',
+    data: {},
+    content: [{ nodeType: 'paragraph', data: {}, content: [{ nodeType: 'text', value: text, marks: [], data: {} }] }],
+  });
+  return {
+    fields: {
+      textoSobreMi: { es: document('Hola'), en: document('Hello') },
+      fotosDeslizantesSobreMi: { es: [photo('1'), photo('2')] },
+    },
+  };
+}
+
+test('carga el texto localizado y conserva el orden de las fotos compartidas', () => {
+  const about = parseAbout(aboutEntry(), 'en');
+  assert.equal(about.richContent.content[0].content[0].value, 'Hello');
+  assert.deepEqual(about.photos.map(photo => photo.alt), ['Photo 1', 'Photo 2']);
+  assert.deepEqual(about.photos.map(photo => photo.url), [
+    'https://images.ctfassets.net/space/1.jpg',
+    'https://images.ctfassets.net/space/2.jpg',
+  ]);
+});
+
+test('admite hasta dos fotos y rechaza traducciones ausentes o fotos no válidas', () => {
+  const entry = aboutEntry();
+  delete entry.fields.fotosDeslizantesSobreMi;
+  assert.deepEqual(parseAbout(entry, 'es').photos, []);
+  const withPhotos = aboutEntry();
+  withPhotos.fields.fotosDeslizantesSobreMi.es.pop();
+  assert.equal(parseAbout(withPhotos, 'es').photos.length, 1);
+  withPhotos.fields.fotosDeslizantesSobreMi.es = null;
+  assert.throws(() => parseAbout(withPhotos, 'es'), /hasta dos fotos/);
+  withPhotos.fields.fotosDeslizantesSobreMi.es = [{}, {}, {}];
+  assert.throws(() => parseAbout(withPhotos, 'es'), /hasta dos fotos/);
+  const invalid = aboutEntry();
+  delete invalid.fields.textoSobreMi.en;
+  assert.throws(() => parseAbout(invalid, 'en'), /traducción \(en\)/);
+  invalid.fields.fotosDeslizantesSobreMi.es[0].fields.file.es.contentType = 'application/pdf';
+  assert.throws(() => parseAbout(invalid, 'es'), /imagen publicada válida/);
+  invalid.fields.fotosDeslizantesSobreMi.es[0].fields.file.es.contentType = 'image/jpeg';
+  invalid.fields.fotosDeslizantesSobreMi.es[0].fields.file.es.url = 'https://example.com/image.jpg';
+  assert.throws(() => parseAbout(invalid, 'es'), /origen no permitido/);
 });
 
 function entry() {

@@ -24,6 +24,9 @@ const es = {
     pageErrorDetails: "Se ha producido un error incluso después de volver a intentarlo.",
     backHome: "Volver al inicio",
     retryingPage: "Reintentando mostrar la página…",
+    loadingAbout: "Cargando información sobre mí…",
+    unavailableAbout: "La información sobre mí aún no está publicada.",
+    aboutLoadError: "No se pudo cargar la información sobre mí. Comprueba la conexión y la configuración de Contentful.",
 } as const;
 
 const en: Record<keyof typeof es, string> = {
@@ -50,6 +53,9 @@ const en: Record<keyof typeof es, string> = {
     pageErrorDetails: "An error occurred even after retrying.",
     backHome: "Back to home",
     retryingPage: "Retrying the page…",
+    loadingAbout: "Loading about me…",
+    unavailableAbout: "About me information has not been published yet.",
+    aboutLoadError: "Could not load the about me information. Check your connection and Contentful configuration.",
 };
 
 const translations = { es, en };

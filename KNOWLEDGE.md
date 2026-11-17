@@ -15,6 +15,7 @@
 - Contacto: `NavBar` abre `ContactModal` sobre la página actual; el diálogo se cierra con botón, Escape o clic fuera. En MainPage, `onContactOpenChange` sincroniza la animación del título.
 - Idioma: `LanguageProvider` comparte la selección entre rutas, la guarda en el navegador y utiliza español por defecto; no modifica las URL.
 - Proyectos de Contentful: se solicitan todos los locales y se seleccionan los textos del idioma activo; los campos compartidos y archivos multimedia pueden usar `es`, sin sustituir traducciones de texto ausentes.
+- Sobre mí: una entrada `sobreMi` aporta la biografía localizada y hasta dos fotos compartidas; las fotos se muestran en orden en el mismo marco con transición por scroll.
 
 ## Estructura
 - React + react-router-dom

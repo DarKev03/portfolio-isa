@@ -10,6 +10,11 @@ import NavBar from '../components/NavBar';
 import CvDownload from '../components/CvDownload';
 import { useLanguage } from '../i18n/languageContext';
 import { Link } from 'react-router-dom';
+import { BLOCKS } from '@contentful/rich-text-types';
+import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { useAbout } from '../contentful/useAbout';
+import { readImage } from '../contentful/projects';
+import { useTranslation } from '../i18n/translations';
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -18,9 +23,12 @@ gsap.registerPlugin(ScrollTrigger);
 const AboutMe = () => {
 
     const { language } = useLanguage();
+    const text = useTranslation();
+    const aboutState = useAbout();
+    const aboutContent = aboutState.status === 'ready' ? aboutState.content : null;
+    const [firstPhoto, secondPhoto] = aboutContent?.photos ?? [];
     const sectionRef = useRef<HTMLDivElement>(null);
 
-    const imgRef = useRef<HTMLImageElement>(null);
     const img2Ref = useRef<HTMLImageElement>(null);
 
     const navBarRef = useRef<HTMLDivElement>(null);
@@ -54,40 +62,17 @@ const AboutMe = () => {
                 opacity: 1,
             });
 
-            gsap.to(imageContainer, {
-                y: targetY + 200,
-                opacity: 0,
-                rotation: 0,
-
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top top',
-                    end: '+=300',
-                    scrub: true,
-                },
-            });
-
-            gsap.from(img2Ref.current, {
-
-                y: () => {
-
-                    const imgRect =
-                        imgRef.current!.getBoundingClientRect();
-
-                    return -1 * imgRect.top;
-                },
-
-                opacity: 0,
-                rotation: 0,
-
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top top',
-                    end: '+=300',
-                    scrub: true,
-                },
-
-            });
+            if (img2Ref.current) {
+                gsap.to(img2Ref.current, {
+                    opacity: 1,
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: 'top top',
+                        end: '+=300',
+                        scrub: true,
+                    },
+                });
+            }
 
 
             /*
@@ -223,9 +208,10 @@ const AboutMe = () => {
         }, sectionRef);
 
 
+        ScrollTrigger.refresh();
         return () => ctx.revert();
 
-    }, []);
+    }, [aboutContent, aboutState.status]);
 
 
     useEffect(() => {
@@ -295,31 +281,16 @@ const AboutMe = () => {
                 </div>
 
 
-                {/* IMAGEN SUPERIOR */}
+                {/* FOTOS */}
 
                 <div
                     ref={imageContainerRef}
-                    className="pointer-events-none fixed top-0 right-0 z-50 pr-8"
+                    className={`pointer-events-none fixed top-0 right-0 z-50 pr-8 ${firstPhoto ? '' : 'invisible'}`}
                 >
-
-                    <img
-                        ref={imgRef}
-                        src="/svgviewer-output.svg"
-                        alt=""
-                    />
-
-                </div>
-
-
-                {/* SEGUNDA IMAGEN */}
-
-                <div className="pointer-events-none pr-10 absolute bottom-0 right-0 z-50 pb-8">
-
-                    <img
-                        ref={img2Ref}
-                        src="/svgviewer-output-scroll.svg"
-                        alt=""
-                    />
+                    <div className="relative h-[224px] w-[168px] overflow-hidden">
+                        {firstPhoto && <img src={firstPhoto.url} alt={firstPhoto.alt} className="h-full w-full object-cover" />}
+                        {secondPhoto && <img ref={img2Ref} src={secondPhoto.url} alt={secondPhoto.alt} className="absolute inset-0 h-full w-full object-cover opacity-0" />}
+                    </div>
 
                 </div>
 
@@ -328,32 +299,23 @@ const AboutMe = () => {
 
                 <div
                     ref={bioRef}
-                    lang="es"
                     className="absolute bottom-0 left-0 z-50 w-140 p-8 text-lg leading-tight"
                     style={{
                         fontFamily: 'Castoro, sans-serif'
                     }}
                 >
 
-                    <p>
-
-                        Soy Isabel Faubel, diseñadora gráfica.
-
-                        <br />
-
-                        Trabajo desde la idea del diseño como un proceso con intención:
-
-                        <br></br>
-
-                        un punto de encuentro donde las ideas cobran forma para conectar de
-                        manera real con las personas. Me apasiona cuidar esos pequeños
-                        detalles que marcan la diferencia y hacen que un proyecto no solo
-                        funcione, sino que tenga un valor real. Disfruto explorando cada
-                        etapa del proceso creativo y viendo hasta dónde pueden llegar las
-                        ideas. Para mí, la visión global de un proyecto es fundamental.
-                        Por eso, me gusta abordar mi trabajo desde una perspectiva multidisciplinar.
-
-                    </p>
+                    {aboutState.status === 'loading' && <p role="status">{text.loadingAbout}</p>}
+                    {aboutState.status === 'unavailable' && <p role="status">{text.unavailableAbout}</p>}
+                    {aboutState.status === 'error' && <p role="alert">{aboutState.message}</p>}
+                    {aboutContent && documentToReactComponents(aboutContent.richContent, {
+                        renderNode: {
+                            [BLOCKS.EMBEDDED_ASSET]: node => {
+                                const image = readImage(node.data.target, 'Isabel Faubel', language);
+                                return <img src={image.url} alt={image.alt} />;
+                            },
+                        },
+                    })}
 
                 </div>
 

@@ -91,7 +91,7 @@ function validateNodes(node: Block | Inline, title: string, locale: Language): v
         BLOCKS.EMBEDDED_ASSET, INLINES.HYPERLINK,
     ];
     if (!supportedNodes.includes(node.nodeType)) {
-        throw new ContentfulDataError("El proyecto contiene un bloque no compatible.", "The project contains an unsupported block.");
+        throw new ContentfulDataError("El contenido contiene un bloque no compatible.", "The content contains an unsupported block.");
     }
     if (node.nodeType === BLOCKS.EMBEDDED_ASSET) {
         readImage(node.data.target, title, locale);
@@ -99,7 +99,7 @@ function validateNodes(node: Block | Inline, title: string, locale: Language): v
     if (node.nodeType === INLINES.HYPERLINK) {
         const href = z.string().safeParse(node.data.uri);
         if (!href.success || !/^(https?:|mailto:)/i.test(href.data)) {
-            throw new ContentfulDataError("El proyecto contiene un enlace no permitido.", "The project contains a disallowed link.");
+            throw new ContentfulDataError("El contenido contiene un enlace no permitido.", "The content contains a disallowed link.");
         }
     }
     for (const child of node.content) {
@@ -130,6 +130,14 @@ const entrySchema = z.object({
     }),
 });
 
+export function parseRichText(value: unknown, fallbackAlt: string, locale: Language): Document {
+    if (!isDocument(value)) {
+        throw new ContentfulDataError("El texto enriquecido no es válido.", "The rich text is invalid.");
+    }
+    for (const node of value.content) validateNodes(node, fallbackAlt, locale);
+    return value;
+}
+
 export function parseProject(value: unknown, locale: Language = "es"): CmsProject {
     const result = entrySchema.safeParse(value);
     if (!result.success) {
@@ -142,10 +150,7 @@ export function parseProject(value: unknown, locale: Language = "es"): CmsProjec
 
     const { sys, fields } = result.data;
     const image = readImage(fields.portada, fields.titulo, locale);
-    if (!isDocument(fields.textoProyecto)) {
-        throw new ContentfulDataError("El texto enriquecido de un proyecto no es válido.", "A project's rich text is invalid.");
-    }
-    for (const node of fields.textoProyecto.content) validateNodes(node, fields.titulo, locale);
+    const richContent = parseRichText(fields.textoProyecto, fields.titulo, locale);
 
     return {
         id: sys.id,
@@ -154,7 +159,7 @@ export function parseProject(value: unknown, locale: Language = "es"): CmsProjec
         image: image.url,
         imageAlt: image.alt,
         year: fields.fechaPublicacin ? Number(fields.fechaPublicacin.slice(0, 4)) : undefined,
-        richContent: fields.textoProyecto,
+        richContent,
     };
 }
 
