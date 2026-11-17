@@ -102,14 +102,14 @@ const ProjectsPage = () => {
                 }}
             >
                 {projectList.map((project, index) => (
-                    <div
+                    <Link
                         key={project.id}
-                        className="group relative flex flex-row items-center gap-25 pl-11 pr-11 hover:text-gray-600 cursor-pointer transition-colors duration-500 ease-in-out w-full"
-                        onClick={() => navigate(`/projects/${project.id}`)}
+                        to={`/projects/${project.id}`}
+                        className="group relative flex w-full flex-row items-center gap-3 px-4 transition-colors duration-500 ease-in-out hover:text-gray-600 sm:gap-8 sm:px-11 lg:gap-25"
                         onMouseEnter={() => handleMouseEnter(project.id)}
                         onMouseLeave={() => setHoveredProjectId(null)}
                     >
-                        <div className="flex flex-col items-start w-64 m-0 mt-auto">
+                        <div className="m-0 mt-auto flex min-w-0 flex-1 flex-col items-start sm:w-64 sm:flex-none">
                             <h3 className="text-2xl font-normal m-0 leading-none transition-all duration-400 group-hover:-skew-x-10">
                                 {project.title}
                             </h3>
@@ -133,7 +133,7 @@ const ProjectsPage = () => {
                             </div>
                         </div>
 
-                        <div className="flex w-22 justify-between text-base font-normal mt-auto italic">
+                        <div className="mt-auto flex w-12 shrink-0 justify-between text-base font-normal italic sm:w-22">
                             <span>(</span>
                             <span>{` 0${index + 1} `}</span>
                             <span>)</span>
@@ -144,7 +144,7 @@ const ProjectsPage = () => {
                         </span>
 
                         {!alreadyHovered && project.id === 1 && (
-                            <div className="absolute left-200 bottom-0 w-90 lg:left-250 aspect-square pointer-events-none">
+                            <div className="pointer-events-none absolute bottom-0 left-250 hidden aspect-square w-90 lg:block">
                                 <video
                                     src={gif}
                                     autoPlay
@@ -160,7 +160,7 @@ const ProjectsPage = () => {
                                 project={project}
                             />
                         )}
-                    </div>
+                    </Link>
                 ))}
             </div>
 
