@@ -52,27 +52,26 @@ const AboutMe = () => {
 
             if (!navBar || !imageContainer) return;
 
-            const navRect = navBar.getBoundingClientRect();
-            const imageRect = imageContainer.getBoundingClientRect();
-
-            const targetY = navRect.bottom - imageRect.top + 20;
-
             gsap.set(imageContainer, {
-                y: targetY,
                 opacity: 1,
             });
 
-            const photoScrollDistance = 300;
             const photoTimeline = gsap.timeline({
                 defaults: { ease: 'none' },
                 scrollTrigger: {
                     trigger: sectionRef.current,
                     start: 'top top',
-                    end: `+=${photoScrollDistance}`,
+                    end: 'max',
                     scrub: true,
+                    invalidateOnRefresh: true,
                 },
             });
-            photoTimeline.to(imageContainer, { y: targetY - photoScrollDistance }, 0);
+            photoTimeline.fromTo(
+                imageContainer,
+                { y: () => navBar.getBoundingClientRect().bottom + 20 },
+                { y: () => window.innerHeight - imageContainer.offsetHeight },
+                0,
+            );
 
             if (img2Ref.current) {
                 photoTimeline.to(img2Ref.current, { opacity: 1 }, 0);
@@ -289,7 +288,7 @@ const AboutMe = () => {
 
                 <div
                     ref={imageContainerRef}
-                    className={`pointer-events-none fixed top-0 right-0 z-50 pr-8 ${firstPhoto ? '' : 'invisible'}`}
+                    className={`pointer-events-none fixed top-0 right-0 z-50 pb-8 pr-8 ${firstPhoto ? '' : 'invisible'}`}
                 >
                     <div className="relative h-[224px] w-[168px] overflow-hidden">
                         {firstPhoto && <img src={firstPhoto.url} alt={firstPhoto.alt} className="h-full w-full object-cover" />}
