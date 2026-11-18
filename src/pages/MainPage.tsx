@@ -1,20 +1,179 @@
+import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import InfiniteCanvas from "../components/InfiniteCanvas";
+import Title from "../components/Title";
 import NavBar from "../components/NavBar";
+import { useReducedMotion } from "../components/useReducedMotion";
 
 const MainPage = () => {
+    const titleRef = useRef<HTMLDivElement>(null);
+    const canvasRef = useRef<HTMLDivElement>(null);
+    const backgroundRef = useRef<HTMLDivElement>(null);
+    const titleRef2 = useRef<HTMLDivElement>(null);
+    const navBarRef = useRef<HTMLDivElement>(null);
+    const pendingFocusRef = useRef<"first" | "last" | null>(null);
+    const reducedMotion = useReducedMotion();
+
+    const [hasIntroFinished, setHasIntroFinished] = useState(reducedMotion);
+    const [hasInteracted, setHasInteracted] = useState(false);
+    const [contactOpen, setContactOpen] = useState(false);
+    const secondTitleVisible = reducedMotion || (hasIntroFinished && hasInteracted);
+
+    useEffect(() => {
+        const el = titleRef.current;
+        const canvasEl = canvasRef.current;
+        const backgroundEl = backgroundRef.current;
+
+        if (reducedMotion) {
+            gsap.set([el, canvasEl, backgroundEl], { opacity: 1 });
+        } else if (el && canvasEl && backgroundEl) {
+            const tl = gsap.timeline({ onComplete: () => setHasIntroFinished(true) });
+            tl.fromTo(
+                backgroundEl,
+                { opacity: 1, y: 0 },
+                { opacity: 1, y: 0, duration: 2 },
+            )
+                .fromTo(
+                    el,
+                    { opacity: 0 },
+                    { opacity: 1, duration: 2 },
+                    "-=0.4",
+                )
+                .fromTo(
+                    canvasEl,
+                    { opacity: 0 },
+                    { opacity: 1, duration: 2 },
+                    "-=0.5",
+                );
+            return () => { tl.kill(); };
+        }
+    }, [reducedMotion]);
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (secondTitleVisible || event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
+            if (["Shift", "Control", "Alt", "Meta"].includes(event.key)) return;
+
+            if (event.key === "Tab") {
+                event.preventDefault();
+                pendingFocusRef.current = event.shiftKey ? "last" : "first";
+            }
+            setHasInteracted(true);
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [secondTitleVisible]);
+
+    useEffect(() => {
+        const el2 = titleRef2.current;
+        const el = titleRef.current;
+        const navBarEl = navBarRef.current;
+
+        if (el2 && navBarEl && secondTitleVisible) {
+            if (reducedMotion) {
+                gsap.set(el, { opacity: 0 });
+                gsap.set([el2, navBarEl], { opacity: 1 });
+                return;
+            }
+            const tl = gsap.timeline();
+            tl.to(
+                el,
+                { opacity: 0, duration: 2 },
+            )
+                .to(
+                    el2,
+                    { opacity: 1, duration: 2 },
+                    "-=2",
+                );
+
+            if (pendingFocusRef.current) {
+                gsap.set(navBarEl, { opacity: 1 });
+                const controls = navBarEl.querySelectorAll<HTMLElement>("button:not([disabled]), a[href]");
+                const target = pendingFocusRef.current === "last" ? controls[controls.length - 1] : controls[0];
+                pendingFocusRef.current = null;
+                target?.focus();
+            } else {
+                tl.to(navBarEl, { opacity: 1, duration: 2 }, "-=4");
+            }
+            return () => { tl.kill(); };
+        }
+    }, [secondTitleVisible, reducedMotion]);
+
+    useEffect(() => {
+        const titleEl = titleRef2.current;
+
+        if (!titleEl) return;
+
+        if (reducedMotion) {
+            gsap.set(titleEl, { opacity: contactOpen ? 0 : 1 });
+            return;
+        }
+        const tl = gsap.timeline();
+
+        if (contactOpen) {
+            tl.to(
+                titleEl,
+                {
+                    opacity: 0,
+                    duration: 0.5,
+                    ease: "power2.out",
+                },
+                0
+            );
+        } else if (!contactOpen && secondTitleVisible) {
+            tl.to(
+                titleEl,
+                {
+                    opacity: 1,
+                    duration: 4,
+                    ease: "power2.out",
+                },
+                0
+            );
+        }
+
+        return () => {
+            tl.kill();
+        };
+    }, [contactOpen, reducedMotion, secondTitleVisible]);
+
     return (
-        <div className="min-h-screen bg-[rgba(255,254,253,1)]">
-            <NavBar />
-            <div className="flex items-center justify-center pt-20">
-                <div className="text-center">
-                    <h1 className="text-5xl font-extrabold text-blue-600 drop-shadow-lg mb-4">
-                        Hola Tailwind CSS + Vite + React!
-                    </h1>
-                    <p className="text-gray-600 text-lg">
-                        Este es el esqueleto de tu página principal con rutas configuradas.
-                    </p>
-                </div>
+        <div
+            onPointerDown={() => { pendingFocusRef.current = null; setHasInteracted(true); }}
+            onWheel={() => { pendingFocusRef.current = null; setHasInteracted(true); }}
+            ref={backgroundRef}
+            className="relative h-screen w-screen overflow-hidden">
+            <div
+                ref={titleRef}
+                className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
+            >
+                <Title />
+            </div>
+            <div
+                ref={titleRef2}
+                className="fixed inset-0 z-50 pointer-events-none p-8 opacity-0"
+            >
+                <Title />
+            </div>
+            <div
+                ref={navBarRef}
+                className="fixed top-0 right-0 z-50 p-8 opacity-0"
+                inert={!secondTitleVisible}
+                aria-hidden={!secondTitleVisible}
+                onFocusCapture={() => {
+                    gsap.killTweensOf(navBarRef.current);
+                    gsap.set(navBarRef.current, { opacity: 1 });
+                }}
+            >
+                <NavBar onContactOpenChange={setContactOpen} />
+            </div>
+            <div
+                ref={canvasRef}
+                className="absolute inset-0">
+                <InfiniteCanvas />
             </div>
         </div>
+
     );
 };
 

@@ -1,3 +1,5 @@
+import { ContentBlock } from "./ContentBlock";
+
 export interface Project {
     id: number;
     title: string;
@@ -5,4 +7,5 @@ export interface Project {
     tags: string[];
     image: string;
     year: number;
+    content?: ContentBlock[];
 }

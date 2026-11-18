@@ -2,55 +2,132 @@
     {
         "id": 1,
         "title": "Lazos",
-        "description": "Un sitio web moderno construido con React, Vite y Tailwind CSS para mostrar mis proyectos y habilidades.",
+        "description": "Exploración visual sobre la conexión humana a través de la fotografía analógica y el diseño editorial.",
         "tags": [
             "Fotografía",
             "Editorial"
         ],
-        "image": "https://picsum.photos/seed/portfolio/600/400",
-        "year": 2024
+        "image": "https://picsum.photos/seed/lazos-main/1200/800",
+        "year": 2024,
+        "content": [
+            {
+                "type": "image-text",
+                "text": "Lazos es un proyecto que profundiza en la intimidad y los vínculos invisibles. La tipografía serifada busca evocar una sensación de nostalgia y permanencia.",
+                "image": "https://picsum.photos/seed/lazos-1/1000/1000",
+                "imageSize": "75"
+            },
+            {
+                "type": "image-full",
+                "image": "https://picsum.photos/seed/lazos-2/1600/900"
+            },
+            {
+                "type": "text-image",
+                "text": "La selección de papel y la encuadernación artesanal fueron cruciales para transmitir la calidez de las capturas analógicas de 35mm.",
+                "image": "https://picsum.photos/seed/lazos-3/1200/800",
+                "imageSize": "80"
+            },
+            {
+                "type": "image-full",
+                "image": "https://picsum.photos/seed/lazos-4/1600/900"
+            }
+        ]
     },
     {
         "id": 2,
         "title": "Malmö",
-        "description": "Una plataforma de comercio electrónico con carrito de compras, pasarela de pago y panel de administración.",
+        "description": "Identidad visual para un estudio de arquitectura sueco basado en el minimalismo funcional.",
         "tags": [
-            "Identidad"
+            "Identidad",
+            "Branding"
         ],
-        "image": "https://picsum.photos/seed/ecommerce/600/400",
-        "year": 2023
+        "image": "https://picsum.photos/seed/malmo-main/1200/800",
+        "year": 2023,
+        "content": [
+            {
+                "type": "image-full",
+                "image": "https://picsum.photos/seed/malmo-1/1600/900"
+            },
+            {
+                "type": "text-image",
+                "text": "El sistema visual se basa en una retícula modular que refleja la estructura y el orden de los proyectos arquitectónicos del estudio.",
+                "image": "https://picsum.photos/seed/malmo-2/1200/800",
+                "imageSize": "70"
+            },
+            {
+                "type": "image-text",
+                "text": "Uso de una paleta cromática neutra con acentos en azul nórdico para enfatizar la sobriedad y la precisión técnica.",
+                "image": "https://picsum.photos/seed/malmo-3/1000/1000",
+                "imageSize": "85"
+            }
+        ]
     },
     {
         "id": 3,
         "title": "Por si a caso",
-        "description": "Visualización de datos complejos en tiempo real utilizando gráficos interactivos y filtros dinámicos.",
+        "description": "Fanzine experimental que explora el error y la saturación visual mediante técnicas de fotocopia.",
         "tags": [
             "Editorial",
             "Experimental"
         ],
-        "image": "https://picsum.photos/seed/dashboard/600/400",
-        "year": 2024
+        "image": "https://picsum.photos/seed/acaso-main/1200/800",
+        "year": 2024,
+        "content": [
+            {
+                "type": "image-text",
+                "text": "Este proyecto nace del azar. Utilizamos procesos de degradación de imagen para encontrar nuevas texturas y formas orgánicas.",
+                "image": "https://picsum.photos/seed/acaso-1/1200/800",
+                "imageSize": "65"
+            },
+            {
+                "type": "image-full",
+                "image": "https://picsum.photos/seed/acaso-2/1600/900"
+            }
+        ]
     },
     {
         "id": 4,
         "title": "Coia",
-        "description": "Descripción del proyecto Coia.",
+        "description": "Rediseño de la interfaz de usuario para una plataforma de gestión artística local.",
         "tags": [
-            "Identidad",
+            "Product Design",
             "UIUX"
         ],
-        "image": "https://picsum.photos/seed/coia/600/400",
-        "year": 2024
+        "image": "https://picsum.photos/seed/coia-main/1200/800",
+        "year": 2024,
+        "content": [
+            {
+                "type": "image-full",
+                "image": "https://picsum.photos/seed/coia-1/1600/900"
+            },
+            {
+                "type": "text-image",
+                "text": "El objetivo principal era simplificar el flujo de publicación para artistas, priorizando la legibilidad y el minimalismo en la interfaz móvil.",
+                "image": "https://picsum.photos/seed/coia-2/1200/800",
+                "imageSize": "75"
+            }
+        ]
     },
     {
         "id": 5,
-        "title": "Señaletica aereopuerto",
-        "description": "Sistema de señalización y orientación para terminales aéreas.",
+        "title": "Señaletica",
+        "description": "Sistema de orientación espacial para el nuevo Centro de Arte Contemporáneo.",
         "tags": [
             "Identidad",
-            "Editorial"
+            "Ambiental"
         ],
-        "image": "https://picsum.photos/seed/airport/600/400",
-        "year": 2023
+        "image": "https://picsum.photos/seed/sign-main/1200/800",
+        "year": 2023,
+        "content": [
+            {
+                "type": "image-full",
+                "image": "https://picsum.photos/seed/sign-1/1600/900"
+            },
+            {
+                "type": "image-text",
+                "text": "La tipografía de palo seco y los pictogramas minimalistas aseguran una navegación intuitiva, integrándose suavemente con la arquitectura del museo.",
+                "image": "https://picsum.photos/seed/sign-2/1200/800",
+                "imageSize": "80"
+            }
+        ]
     }
 ]

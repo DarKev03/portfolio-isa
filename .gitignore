@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +23,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Docs
+docs
+
+# Archivos auxiliares de compilación de los informes LaTeX
+/analisis/.tex/*.aux
+/analisis/.tex/*.out
+/analisis/.tex/*.toc
+/analisis/.tex/*.fls
+/analisis/.tex/*.pdf
+/analisis/.tex/*.fdb_latexmk
+/analisis/.tex/*.synctex.gz
