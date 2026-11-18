@@ -1,10 +1,11 @@
-import { Project } from "../types/Project";
+import type { DisplayProject } from "../types/CmsProject";
 import ProjectDetail from "./ProjectDetail";
 import { useEffect, useRef } from "react";
 import gsap from 'gsap';
+import { useReducedMotion } from './useReducedMotion';
 
 interface ProjectModalProps {
-    project: Project;
+    project: DisplayProject;
     onClose: () => void;
     onPrevious: () => void;
     onNext: () => void;
@@ -18,17 +19,23 @@ const ProjectModal = ({
 }: ProjectModalProps) => {
 
     const overlayRef = useRef<HTMLDivElement>(null);
-    const modalRef = useRef<HTMLDivElement>(null);
+    const modalRef = useRef<HTMLDialogElement>(null);
+    const reducedMotion = useReducedMotion();
 
     useEffect(() => {
+        const modal = modalRef.current;
+        if (!modal) return;
+        const previouslyFocused = document.activeElement;
+        modal.showModal();
+
         const ctx = gsap.context(() => {
 
             gsap.fromTo(
                 overlayRef.current,
-                { opacity: 0 },
+                { opacity: reducedMotion ? 1 : 0 },
                 {
                     opacity: 1,
-                    duration: 0.4,
+                    duration: reducedMotion ? 0 : 0.4,
                     ease: "power2.out"
                 }
             );
@@ -36,31 +43,45 @@ const ProjectModal = ({
             gsap.fromTo(
                 modalRef.current,
                 {
-                    opacity: 0,
-                    x: 80,
+                    opacity: reducedMotion ? 1 : 0,
+                    x: reducedMotion ? 0 : 80,
                 },
                 {
                     opacity: 1,
                     x: 0,
-                    duration: 0.7,
+                    duration: reducedMotion ? 0 : 0.7,
                     ease: "power3.out"
                 }
             );
 
         });
 
-        return () => ctx.revert();
-    }, []);
+        return () => {
+            ctx.revert();
+            modal.close();
+            if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
+        };
+    }, [reducedMotion]);
 
     return (
-        <div
+        <dialog
             ref={modalRef}
-            className="fixed inset-0 z-50 w-screen h-screen"
-            onClick={onClose}
+            aria-label={project.title}
+            onCancel={(event) => {
+                event.preventDefault();
+                onClose();
+            }}
+            onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                    event.preventDefault();
+                    onClose();
+                }
+            }}
+            className="fixed inset-0 m-0 h-screen max-h-none w-screen max-w-none border-0 bg-transparent p-0 backdrop:bg-transparent"
         >
             <div
                 ref={overlayRef}
-                className="w-screen h-screen max-w-400 bg-transparent"
+                className="w-screen h-screen bg-transparent"
             >
                 <ProjectDetail
                     project={project}
@@ -69,7 +90,7 @@ const ProjectModal = ({
                     onNext={onNext}
                 />
             </div>
-        </div>
+        </dialog>
     );
 };
 

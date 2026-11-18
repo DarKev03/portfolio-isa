@@ -1,14 +1,16 @@
 import { useLayoutEffect, useRef } from "react";
-import { Project } from "../types/Project";
+import type { DisplayProject } from "../types/CmsProject";
 import gsap from "gsap";
+import { useReducedMotion } from "./useReducedMotion";
+import ContentImage from "./ContentImage";
 
 interface ProjectPreviewProps {
-    project: Project;
+    project: DisplayProject;
 }
 
 const ProjectPreview = ({ project }: ProjectPreviewProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const imageRef = useRef<HTMLImageElement>(null);
+    const reducedMotion = useReducedMotion();
 
     useLayoutEffect(() => {
         const ctx = gsap.context(() => {
@@ -17,28 +19,27 @@ const ProjectPreview = ({ project }: ProjectPreviewProps) => {
             tl.fromTo(
                 containerRef.current,
                 {
-                    opacity: 0,                    
+                    opacity: reducedMotion ? 1 : 0,
                 },
                 {
                     opacity: 1,                    
-                    duration: 0.7,
+                    duration: reducedMotion ? 0 : 0.7,
                     ease: "power2.out",
                 }
             );
         }, containerRef);
 
         return () => ctx.revert();
-    }, []);
+    }, [reducedMotion]);
 
     return (
         <div
             ref={containerRef}
             className="absolute right-0 bottom-0 pr-14 w-[40vw] aspect-video pointer-events-none overflow-hidden"
         >
-            <img
-                ref={imageRef}
+            <ContentImage
                 src={project.image}
-                alt={project.title}
+                alt={"imageAlt" in project ? project.imageAlt : project.title}
                 className="w-full h-full object-cover"
             />
         </div>

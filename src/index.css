@@ -17,7 +17,15 @@
     display: none;
 }
 
-.infinite-canvas-root,
-.infinite-canvas-root * {
-    cursor: default !important;
+.about-header:focus-within {
+    opacity: 1 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0s !important;
+        animation-duration: 0s !important;
+        animation-iteration-count: 1 !important;
+    }
 }

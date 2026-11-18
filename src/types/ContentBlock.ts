@@ -1,13 +1,11 @@
 export type BlockType =
     | "text-image"
     | "image-text"
-    | "image-full"
-    | "double-image";
+    | "image-full";
 
 export interface ContentBlock {
     type: BlockType;
     text?: string;
     image?: string;
     imageSize?: string;
-    values?: string[];
 }
